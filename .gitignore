@@ -1,0 +1,17 @@
+# Python
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+.pytest_cache/
+
+# Jupyter
+.ipynb_checkpoints/
+
+# Excel / LibreOffice lock and temp files
+~$*
+.~lock.*#
+
+# OS
+.DS_Store
+Thumbs.db
