@@ -27,7 +27,7 @@ Data: `data/raw/fpa_monthly_close_raw_messy.csv` (synthetic, 43 columns, 152,682
 
 ## 6. Accounting business rules
 - **What:** account signs, reporting periods, journal status, reporting scale. P&L and balance sheet stay separate.
-- **How:** a sign convention is written per account group and checked on fixtures. `fiscal_period` must map to exactly one calendar month. Only journals with an approved status enter reported totals, per a written rule. `report_scale` handling is tested on rows where the label and the real magnitude disagree, using the written rule. Tests assert that no total mixes statement types.
+- **How:** a sign convention is written per account group and checked on fixtures. `fiscal_period` must map to exactly one calendar month. Only journals with an eligible approval status (the file has no `Approved` value; see FINANCIAL_METRICS.md section 5) enter reported totals, per a written rule. `report_scale` handling is tested on rows where the label and the real magnitude disagree, using the written rule. Tests assert that no total mixes statement types.
 
 ## 7. Referential integrity
 - **What:** entity, account, cost center and other mapped dimensions.
