@@ -27,7 +27,8 @@ A rule being written here does not make it verified.
 | R7 | `report_scale` labels are not trusted; scale is decided per row by a written rule. | Confirmed (labels unreliable, owner-stated); rule itself Unresolved | Section 8. |
 | R8 | FX direction is USD = local ÷ rate (local currency per 1 USD). | Proposed—Needs Validation | Section 9. Not final. |
 | R9 | Account sign convention. | Unresolved | Section 6. |
-| R10 | Variance = Actual − Budget; variance percent uses \|Budget\| as denominator. | Proposed—Needs Validation | Section 2. |
+| R10 | Variance = Actual − Budget; variance percent uses \|Budget\| as denominator. This is a proposed project convention, not an accounting standard. | Proposed—Needs Validation | Section 2. |
+| R14 | Every raw row gets exactly one primary exclusion reason or is eligible, using a fixed precedence. Secondary issues are separate flags. | Proposed—Needs Validation | Section 4. |
 | R11 | Duplicate rule for journal lines. | Unresolved | Section 11. |
 | R12 | Consolidation and intercompany elimination. | Unresolved | Section 12. |
 | R13 | Python, SQL and Excel reconcile on a fixed scope; differences are investigated, not forced. | Confirmed (principle) | Owner-stated; method in TEST_PLAN section 9. |
@@ -38,8 +39,8 @@ A rule being written here does not make it verified.
 - **Required fields:** `actual_usd_raw`, `budget_usd_raw` (parsed), `legal_entity`, `fiscal_period`, `gl_account`, `statement`, `approval_status`, `report_scale`.
 - **Scope:** P&L rows only, eligible rows only (section 4), aggregated first and then compared. Never average row-level percentages.
 - **Interpretation:** the sign shows the arithmetic difference. Whether it is good or bad depends on the account type (section 6).
-- **Denominator choices and consequences:**
-  - `|budget|` (proposed): standard in FP&A, stable when actual is volatile, defined whenever a budget exists. Using the absolute value keeps the sign of the percent equal to the sign of the variance when budget is negative.
+- **Denominator choices and consequences.** The absolute-budget denominator is a **proposed project convention**. It is common in FP&A practice but it is not an accounting standard, and other teams use different bases. The convention must be stated wherever a percent is shown.
+  - `|budget|` (proposed convention): stable when actual is volatile and defined whenever a non-zero budget exists. Using the absolute value keeps the sign of the percent equal to the sign of the variance when budget is negative.
   - Signed budget: flips the percent's sign for negative budgets and misleads.
   - Actual: answers a different question (variance relative to outcome), is unstable when actual is near zero, and is rarely used for budget variance.
   - Prior year: this is a year-on-year measure, not budget variance.
@@ -50,26 +51,35 @@ A rule being written here does not make it verified.
 
 ## 3. Forecast error and accuracy
 
-- **Candidate formulas:** forecast error `= forecast − actual`. Absolute percent error `= |forecast − actual| / |actual|`. For an aggregate: `WAPE = Σ|forecast − actual| / Σ|actual|`, and `accuracy = 1 − WAPE`.
+- **Candidate formulas:** forecast error `= forecast − actual`. Absolute percent error `= |forecast − actual| / |actual|`. For an aggregate: `WAPE = Σ|forecast − actual| / Σ|actual|`. A related score is `1 − WAPE`. This is a **WAPE-derived score**, not a standard accuracy measure, and the name "accuracy" should not be used for it without that explanation. It **can be negative** when total absolute error exceeds total absolute actuals. It is reported as calculated and is not floored at zero.
 - **Scope:** P&L, eligible rows, at a chosen grain (entity, account, period). The grain must be fixed first because errors cancel when summed over larger groups.
 - **Interpretation:** WAPE weights large lines more; mean of row percentages weights all lines equally and is dominated by small values.
-- **Edge cases:** actual of zero gives an undefined line percent (excluded from the mean, still counted in WAPE); accuracy can be negative and must not be floored silently.
+- **Edge cases:** actual of zero gives an undefined line percent (excluded from the mean, still counted in WAPE); `1 − WAPE` can be negative and must not be floored silently.
 - **Status:** Proposed—Needs Validation. Depends on the same open question as section 2 about the grain of forecast values.
 
-## 4. Eligible rows for reported totals (scope gate)
+## 4. Eligible rows and exclusion-reason precedence (scope gate)
 
-A row would enter a reported total only if all conditions below hold. Every excluded row must be counted under exactly one reason so that eligible + exclusions = 152,682.
+A row enters a reported total only if it passes every step below. To make the row accounting exact, each raw row gets **one primary exclusion reason**: the first step in the list that it fails. Rows that fail none are **eligible**. The order is fixed and deterministic, so the same row always gets the same reason.
 
-| Condition | Status |
-|---|---|
-| Not a non-posting row (R3) | Confirmed |
-| Entity maps to one of six real entities (R4) | Proposed—Needs Validation |
-| `approval_status` is eligible (section 5) | Proposed—Needs Validation |
-| `statement` known; P&L and balance-sheet reported separately (R2) | Confirmed |
-| Amount parses under a written rule | Proposed—Needs Validation |
-| Scale resolved (section 8) | Unresolved |
-| Period resolved to a month | Proposed—Needs Validation |
-| Not removed as a duplicate (section 11) | Unresolved |
+For each metric scope: `eligible + Σ rows per primary reason = 152,682`. This identity must hold exactly, and it is a test (TEST_PLAN section 11).
+
+| Order | Primary exclusion reason (row fails this step) | Status |
+|---|---|---|
+| 1 | Non-posting row (`notes` = `subtotal row`; R3) | Confirmed |
+| 2 | Junk entity (`TEST ENTITY`, `Do not use`, `xxx`; R4) | Proposed—Needs Validation |
+| 3 | Entity not resolvable (blank or unmapped after name and code mapping) | Proposed—Needs Validation |
+| 4 | Out of scope for this metric: balance-sheet row in a P&L metric, or the reverse (R2). Not an error; reported in its own view | Confirmed |
+| 5 | Journal status not eligible (section 5). The status value is kept, so `Rejected`, `pending`, `Parked` and blank are separately countable | Proposed—Needs Validation |
+| 6 | Period not resolvable to a month | Proposed—Needs Validation |
+| 7 | Amount missing or unparsable in the column this metric uses | Proposed—Needs Validation |
+| 8 | Scale undecidable (section 8) | Unresolved |
+| 9 | Removed as a duplicate (section 11) | Unresolved |
+
+**Why this order.** Structural facts first (is it a posting, whose is it), then scope, then workflow status, then data usability. A row that is both a non-posting row and has a blank status is counted once, as non-posting, because the status of a total row has no meaning. The order is itself a proposal and is validated by the owner with the rest of this document. Steps 8 and 9 stay in the list so that the identity holds once their rules are written.
+
+**Secondary quality issues are not reasons.** Problems that do not by themselves exclude a row are recorded as separate yes/no flags and are never used to assign the primary reason. Examples: whitespace or case variants fixed by cleaning, blank cost centre or region, placeholder `qty_raw`, missing or zero FX rate, unexplained negative sign, `scenario_tag` noise, duplicate-candidate flag, and a missing amount in a column the metric does not use (for example a missing budget when only actuals are summed). Each flag is counted over **all** rows, and also split by primary reason, so a reader can see both "how many rows have this problem" and "how many of those rows were also excluded". Flag counts are overlapping and are not meant to add up to 152,682.
+
+**Metric-level note.** Step 7 depends on the amount column. A variance needs both actual and budget; a row missing only the budget is excluded from variance with step 7 for that metric but stays eligible for an actual-only total. Each metric therefore has its own reconciliation of eligible plus exclusions.
 
 ## 5. Journal status
 

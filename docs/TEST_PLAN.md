@@ -15,7 +15,7 @@ Data: `data/raw/fpa_monthly_close_raw_messy.csv` (synthetic, 43 columns, 152,682
 
 ## 3. Duplicate records
 - **What:** a true duplicate versus legitimate journal lines that share a `document_no`.
-- **How:** the duplicate key is defined in writing. Controlled fixtures contain (a) an exact repeat that must be removed, (b) two lines of one journal that must both stay, (c) a near-duplicate that must be flagged for review. Row counts before and after are reconciled: kept + removed + flagged = input.
+- **How:** the duplicate key is defined in writing. Controlled fixtures contain (a) an exact repeat that must be removed, (b) two lines of one journal that must both stay, (c) a near-duplicate that must be flagged for review. Row counts before and after are reconciled: kept + removed + flagged = input. A removed duplicate is one primary exclusion reason in the row accounting of section 11.
 
 ## 4. Missing values
 - **What:** required fields must be present. Blanks are allowed where the field does not apply (for example a cost center on a balance-sheet line).
@@ -48,6 +48,8 @@ Data: `data/raw/fpa_monthly_close_raw_messy.csv` (synthetic, 43 columns, 152,682
 ## 11. End to end
 - **What:** raw file through cleaning, SQL and dashboard outputs.
 - **How:** run the whole pipeline on the real raw file. Check row-count reconciliation at every step, and that final totals trace back to the cleaned data.
+
+- **Exclusion accounting:** each raw row gets exactly one primary exclusion reason, assigned by the fixed precedence in FINANCIAL_METRICS.md section 4, or is eligible. Tests check that (a) for every metric scope, `eligible + Σ rows per primary reason = 152,682`; (b) a row failing several steps receives only the first reason, using fixtures built to fail two or more steps at once (for example a non-posting row with a blank status); (c) running the assignment twice, or on shuffled rows, gives identical reasons; (d) secondary flags are counted over all rows and split by primary reason, and are never used to choose the primary reason.
 
 ## 12. Dashboard
 - **What:** KPI math, filters, date selections, displayed totals against validated results.
