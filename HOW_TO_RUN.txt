@@ -1,0 +1,55 @@
+PHASE 4 / PHASE 5 - HOW TO RUN (Windows / VS Code terminal; Linux/macOS commands in brackets)
+
+THIS REPOSITORY IS THE COMPLETE PROJECT (Phases 1-9), so the Phase 5 package caveat in earlier versions of this file no longer applies:
+   every source file, SQL script, test and output named below is in this repository.
+   Large data files are stored GZIP-compressed (lossless) and must be decompressed once; see step 0.
+
+0. Data (decompress once; the .gz files are lossless, byte-identical after decompression):
+     Windows PowerShell (needs only Python):
+       python -c "import gzip,shutil;[shutil.copyfileobj(gzip.open(s,'rb'),open(s[:-3],'wb')) for s in ('data/raw/fpa_monthly_close_raw_messy.csv.gz','data/processed/fpa_monthly_close_cleaned.csv.gz')]"
+     Linux / macOS / Git Bash:  gunzip -k data/raw/*.csv.gz data/processed/*.csv.gz
+   Result (the decompressed *.csv files are git-ignored so they cannot be committed by accident):
+     data\raw\fpa_monthly_close_raw_messy.csv                (raw, never edited; SHA-256 a0e6eddde25280aa27a60c5955743d3243b14138d876eedac0547e24a1cc6fff)
+     data\processed\fpa_monthly_close_cleaned.csv             (canonical cleaned file, 174 MB; SHA-256 c184b677bacc6f23086e3b5eedd71836643cb75064e428a1ebfee4c075fa9b47)
+   Verify:  python -c "import hashlib,sys;print(hashlib.sha256(open(sys.argv[1],'rb').read()).hexdigest())" <file>
+   Optional: regenerate the cleaned file yourself instead of decompressing it:
+     python src\clean_fpa_monthly_close.py --output-dir data\processed
+   (Phase 7 correction: without --output-dir the script writes to <your Downloads>\fpa_monthly_close_cleaned\,
+    which the pipeline does not read. It takes about 4-5 minutes and also writes the review workbook and QC files.)
+   The pipeline checks the cleaned file's SHA-256 (above) and refuses to run on any other file.
+
+1. Environment (Python 3.11 or newer):
+     python -m venv .venv
+     .venv\Scripts\activate            [source .venv/bin/activate]
+     pip install -r requirements.txt
+
+2. Build, validate and export (about 20-30 seconds):
+     python src\phase4_pipeline.py
+   Exit code 0 = all 55+24+86+124 checks passed and outputs\phase4\*.csv + MANIFEST.json were promoted.
+   Exit code 1 = missing/invalid input.  Exit code 2 = integrity/validation failure.
+   On failure nothing accepted is overwritten; look in outputs\phase4_failed_run\ and data\processed\phase4_fpa.duckdb.failed.
+
+3. Regenerate the two documents from the validated database:
+     python src\phase4_report.py
+
+4. Tests (about 80 seconds with the cleaned CSV, 2 seconds without):
+     python -m pytest tests -q
+   Without the cleaned CSV only 42 fixture tests run and the run is reported INCOMPLETE (non-zero exit).
+   Phase 7 correction: if step 2 rebuilt the database, run this step as
+     python -m pytest tests -q --ignore=tests\test_phase5_excel.py
+   and run the Phase 5 tests in step 5. The DuckDB file is not byte-identical between rebuilds (its content is), and
+   two Phase 5 tests compare the database SHA-256 recorded in the workbook, so they fail until step 5 regenerates it.
+
+5. Phase 5 Excel workbook (a few seconds; needs the database from step 2 and the documents from step 3):
+     python src\phase5_excel.py
+     python -m pytest tests\test_phase5_excel.py -q
+     python src\phase5_excel.py --qa-report
+   Output: outputs\phase5\fpa_month_end_close_analysis.xlsx, MANIFEST.json, PHASE5_QA_REPORT.md.
+   Exit code 1 = missing input, 2 = Phase 4 hand-off or reconciliation failed. LibreOffice (soffice) is needed for 2 tests; without it they are skipped and reported INCOMPLETE. The workbook has not been opened in Microsoft Excel.
+   Any edit to src\phase5_excel.py or to the Phase 4 documents requires re-running step 5 (the manifest records the generator hash).
+
+6. Rebuild the dashboard HTML (added in Phase 9; this command exited 0 in the Phase 7 isolated re-run, step 07_phase6_build):
+     python src\phase6_dashboard.py
+   Open outputs\phase6\fpa_financial_analytics_dashboard.html in a browser. It is a standalone file: no server, no network.
+
+Nothing here commits, pushes or publishes anything. Not yet run on Windows (built and tested on Linux).

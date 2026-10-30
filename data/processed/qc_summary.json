@@ -1,0 +1,543 @@
+{
+  "script_version": "1.0.0",
+  "timestamp": "2026-10-28 11:55:08",
+  "integrity": {
+    "path": "/mnt/user-data/uploads/Downloads/fpa_monthly_close_raw_messy.csv",
+    "bytes": 51938535,
+    "sha256": "a0e6eddde25280aa27a60c5955743d3243b14138d876eedac0547e24a1cc6fff",
+    "expected_sha256": "a0e6eddde25280aa27a60c5955743d3243b14138d876eedac0547e24a1cc6fff",
+    "expected_bytes": 51938535,
+    "hash_match": true,
+    "size_match": true
+  },
+  "rows": 152682,
+  "columns_cleaned_csv": 192,
+  "exclusion_counts": {
+    "excl_counts_PL_actual": {
+      "5_STATUS_NOT_ELIGIBLE": 82986,
+      "ELIGIBLE": 58340,
+      "4_OUT_OF_SCOPE_STATEMENT": 7125,
+      "7_AMOUNT_MISSING": 3637,
+      "1_NON_POSTING_ROW": 350,
+      "2_JUNK_ENTITY": 204,
+      "8_SCALE_UNDECIDABLE": 24,
+      "3_ENTITY_UNRESOLVABLE": 16
+    },
+    "excl_counts_PL_variance": {
+      "5_STATUS_NOT_ELIGIBLE": 82986,
+      "ELIGIBLE": 55043,
+      "4_OUT_OF_SCOPE_STATEMENT": 7125,
+      "7_AMOUNT_MISSING": 6937,
+      "1_NON_POSTING_ROW": 350,
+      "2_JUNK_ENTITY": 204,
+      "8_SCALE_UNDECIDABLE": 21,
+      "3_ENTITY_UNRESOLVABLE": 16
+    },
+    "excl_counts_BS_actual": {
+      "4_OUT_OF_SCOPE_STATEMENT": 144987,
+      "5_STATUS_NOT_ELIGIBLE": 3989,
+      "ELIGIBLE": 2953,
+      "1_NON_POSTING_ROW": 350,
+      "2_JUNK_ENTITY": 204,
+      "7_AMOUNT_MISSING": 182,
+      "3_ENTITY_UNRESOLVABLE": 16,
+      "8_SCALE_UNDECIDABLE": 1
+    }
+  },
+  "validation": [
+    {
+      "check_id": "V01",
+      "check": "Raw file SHA-256 equals the expected value",
+      "expected": "a0e6eddde25280aa27a60c5955743d3243b14138d876eedac0547e24a1cc6fff",
+      "actual": "a0e6eddde25280aa27a60c5955743d3243b14138d876eedac0547e24a1cc6fff",
+      "result": "PASS"
+    },
+    {
+      "check_id": "V02",
+      "check": "Raw rows x columns",
+      "expected": "152682 x 43",
+      "actual": "152682 x 43",
+      "result": "PASS"
+    },
+    {
+      "check_id": "V03",
+      "check": "Cleaned rows equal raw rows (no row dropped, none added)",
+      "expected": "152682",
+      "actual": "152682",
+      "result": "PASS"
+    },
+    {
+      "check_id": "V04",
+      "check": "row_id unique and unchanged / in raw order",
+      "expected": "identical",
+      "actual": "identical",
+      "result": "PASS"
+    },
+    {
+      "check_id": "V05",
+      "check": "Non-posting rows identified by notes equal those identified by TOTAL/Subtotal/CHECK labels (no label-only / notes-only rows)",
+      "expected": "350 / 0 / 0",
+      "actual": "350 / 0 / 0",
+      "result": "PASS"
+    },
+    {
+      "check_id": "V06",
+      "check": "Non-posting rows keep a blank GL (nothing was invented for them)",
+      "expected": "0",
+      "actual": "0",
+      "result": "PASS"
+    },
+    {
+      "check_id": "V07",
+      "check": "Amount cells that are neither parsable nor a known placeholder/blank",
+      "expected": "0",
+      "actual": "0",
+      "result": "PASS"
+    },
+    {
+      "check_id": "V08",
+      "check": "Independent scalar re-parse of all 763,410 amount cells agrees with the vectorised parser",
+      "expected": "0",
+      "actual": "0",
+      "result": "PASS"
+    },
+    {
+      "check_id": "V09",
+      "check": "No infinite values in any numeric output column",
+      "expected": "0",
+      "actual": "0",
+      "result": "PASS"
+    },
+    {
+      "check_id": "V10_PL_actual",
+      "check": "Exclusion identity (PL_actual): eligible + sum of primary reasons = all rows",
+      "expected": "152682",
+      "actual": "58340 + 94342 = 152682",
+      "result": "PASS"
+    },
+    {
+      "check_id": "V10_PL_variance",
+      "check": "Exclusion identity (PL_variance): eligible + sum of primary reasons = all rows",
+      "expected": "152682",
+      "actual": "55043 + 97639 = 152682",
+      "result": "PASS"
+    },
+    {
+      "check_id": "V10_BS_actual",
+      "check": "Exclusion identity (BS_actual): eligible + sum of primary reasons = all rows",
+      "expected": "152682",
+      "actual": "2953 + 149729 = 152682",
+      "result": "PASS"
+    },
+    {
+      "check_id": "V11",
+      "check": "No fiscal_period left unparsed",
+      "expected": "0",
+      "actual": "0",
+      "result": "PASS"
+    },
+    {
+      "check_id": "V12",
+      "check": "Posting dates not in the fiscal-period month (resolved dates)",
+      "expected": "0",
+      "actual": "0",
+      "result": "PASS"
+    },
+    {
+      "check_id": "V13",
+      "check": "Slash dates left unresolved",
+      "expected": "0",
+      "actual": "0",
+      "result": "PASS"
+    },
+    {
+      "check_id": "V14",
+      "check": "GL master conflicts (one GL with >1 name/group/fs_line/statement) and name->GL conflicts",
+      "expected": "0",
+      "actual": "0 / 0",
+      "result": "PASS"
+    },
+    {
+      "check_id": "V15",
+      "check": "Posting rows with no GL after recovery",
+      "expected": "0",
+      "actual": "0",
+      "result": "PASS"
+    },
+    {
+      "check_id": "V16",
+      "check": "Statement label unmapped / conflicting with GL master",
+      "expected": "0",
+      "actual": "0 / 0",
+      "result": "PASS"
+    },
+    {
+      "check_id": "V17",
+      "check": "Entity name -> code conflicts; name/code disagreement; country or currency not matching the entity",
+      "expected": "0",
+      "actual": "0 / 0 / 0 / 0",
+      "result": "PASS"
+    },
+    {
+      "check_id": "V18",
+      "check": "actual_usd_adj = actual_usd_parsed x decided divisor on every decided row (independent recompute)",
+      "expected": "all equal",
+      "actual": "all equal",
+      "result": "PASS"
+    },
+    {
+      "check_id": "V19",
+      "check": "Undetermined-scale rows have no adjusted value (not guessed)",
+      "expected": "0",
+      "actual": "0",
+      "result": "PASS"
+    },
+    {
+      "check_id": "V20",
+      "check": "Rows decided + undetermined + non-posting = all rows",
+      "expected": "152682",
+      "actual": "152682",
+      "result": "PASS"
+    },
+    {
+      "check_id": "V21",
+      "check": "Peer z-score rule vs price-identity truth on Thousands/Lakhs rows: confidently wrong classifications",
+      "expected": "0",
+      "actual": "0 of 2089",
+      "result": "PASS"
+    },
+    {
+      "check_id": "V22",
+      "check": "Every FX 'NO_MATCH' row has rate exactly 1.0 on a non-USD currency (information)",
+      "expected": "all",
+      "actual": "1645 of 1645",
+      "result": "PASS"
+    },
+    {
+      "check_id": "V23",
+      "check": "Duplicate tiers cover every posting row exactly once",
+      "expected": "152332",
+      "actual": "152332",
+      "result": "PASS"
+    },
+    {
+      "check_id": "V24",
+      "check": "Each anchor belongs to a distinct document group",
+      "expected": "3925",
+      "actual": "3925",
+      "result": "PASS"
+    },
+    {
+      "check_id": "V25",
+      "check": "No cleaned text cell has leading/trailing whitespace",
+      "expected": "0",
+      "actual": "0",
+      "result": "PASS"
+    },
+    {
+      "check_id": "V26_G01",
+      "check": "Audit rows for G01 equal flag count flag_gl_filled",
+      "expected": "3101",
+      "actual": "3101",
+      "result": "PASS"
+    },
+    {
+      "check_id": "V26_G03",
+      "check": "Audit rows for G03 equal flag count flag_fs_line_filled",
+      "expected": "3747",
+      "actual": "3747",
+      "result": "PASS"
+    },
+    {
+      "check_id": "V26_M02",
+      "check": "Audit rows for M02 equal flag count flag_region_filled",
+      "expected": "6180",
+      "actual": "6180",
+      "result": "PASS"
+    },
+    {
+      "check_id": "V26_P02",
+      "check": "Audit rows for P02 equal flag count flag_fiscal_year_filled",
+      "expected": "1506",
+      "actual": "1506",
+      "result": "PASS"
+    },
+    {
+      "check_id": "V26_B01",
+      "check": "Audit rows for B01 equal flag count flag_batch_year_inferred",
+      "expected": "3041",
+      "actual": "3041",
+      "result": "PASS"
+    },
+    {
+      "check_id": "V26_P03",
+      "check": "Audit rows for P03 equal flag count flag_posting_date_resolved_by_period",
+      "expected": "55318",
+      "actual": "55318",
+      "result": "PASS"
+    },
+    {
+      "check_id": "V27",
+      "check": "Every one of the 43 original fields has its cleaned counterpart in the review workbook (no original field silently lost)",
+      "expected": "none missing",
+      "actual": "none missing",
+      "result": "PASS"
+    },
+    {
+      "check_id": "V28",
+      "check": "Every original field has a cleaned counterpart in the canonical CSV",
+      "expected": "none missing",
+      "actual": "none missing",
+      "result": "PASS"
+    },
+    {
+      "check_id": "V29",
+      "check": "Count_Reconciliation: Column_Profile (all rows) - non-posting = DQ_Findings = Flag_Counts = CSV flag sum for the 6 missing-value fields",
+      "expected": "0 differences",
+      "actual": "0 differences",
+      "result": "PASS"
+    },
+    {
+      "check_id": "V30",
+      "check": "Count_Reconciliation: every single-flag finding equals its Flag_Counts row and the CSV flag sum",
+      "expected": "0 differences",
+      "actual": "0 of 38",
+      "result": "PASS"
+    },
+    {
+      "check_id": "V31",
+      "check": "Transformation_Log: distinct rows affected never exceed the row count; cells_changed >= distinct rows where both are stated",
+      "expected": "all valid",
+      "actual": "all valid",
+      "result": "PASS"
+    },
+    {
+      "check_id": "V32",
+      "check": "Scale restorations split: HIGH (price identity) + MEDIUM (peer z-score) = all restored rows",
+      "expected": "6265",
+      "actual": "6265",
+      "result": "PASS"
+    },
+    {
+      "check_id": "V33",
+      "check": "Undetermined-scale rows: no adjusted value in ANY of the 5 amount columns, and the strict adjusted exclusion total is 0",
+      "expected": "0 / 0.00",
+      "actual": "0 / 0.00",
+      "result": "PASS"
+    },
+    {
+      "check_id": "V34",
+      "check": "Duplicate tiers: same-sign candidates have no sign difference; sign-conflict candidates have >=1",
+      "expected": "0",
+      "actual": "0",
+      "result": "PASS"
+    },
+    {
+      "check_id": "V36",
+      "check": "USD/FX population waterfall closes (posting = missing + zero + usable; usable = within + outside; amount test = overlap + rest) and ties to the flags",
+      "expected": "closes",
+      "actual": "closes",
+      "result": "PASS"
+    },
+    {
+      "check_id": "V35",
+      "check": "Schema map covers every CSV column exactly once",
+      "expected": "192",
+      "actual": "192",
+      "result": "PASS"
+    }
+  ],
+  "readback": [
+    {
+      "check_id": "RB01",
+      "check": "Cleaned CSV reopens: rows x columns",
+      "expected": "152682 x 192",
+      "actual": "152682 x 192",
+      "result": "PASS"
+    },
+    {
+      "check_id": "RB02",
+      "check": "Cleaned CSV header equals the in-memory column order",
+      "expected": "equal",
+      "actual": "equal",
+      "result": "PASS"
+    },
+    {
+      "check_id": "RB03",
+      "check": "CSV row_id sequence equals in-memory",
+      "expected": "equal",
+      "actual": "equal",
+      "result": "PASS"
+    },
+    {
+      "check_id": "RB04",
+      "check": "Sum of actual_usd_adj in CSV equals in-memory",
+      "expected": "2,539,833,112.6736",
+      "actual": "2,539,833,112.6736",
+      "result": "PASS"
+    },
+    {
+      "check_id": "RB05",
+      "check": "Eligible (P&L actual) row count in CSV equals in-memory",
+      "expected": "58340",
+      "actual": "58340",
+      "result": "PASS"
+    },
+    {
+      "check_id": "RB06",
+      "check": "CSV text identifiers keep leading zeros / exact text (document_no, cost_center_code, gl_account)",
+      "expected": "equal",
+      "actual": "equal",
+      "result": "PASS"
+    },
+    {
+      "check_id": "RB07",
+      "check": "CSV posting_date text equals in-memory ISO date",
+      "expected": "equal",
+      "actual": "equal",
+      "result": "PASS"
+    },
+    {
+      "check_id": "RB16",
+      "check": "CSV keeps all original rows in source order (source_row_number = 2 .. n+1, row_id unique)",
+      "expected": "2..152683",
+      "actual": "2..152683",
+      "result": "PASS"
+    },
+    {
+      "check_id": "RB17",
+      "check": "CSV row_id sequence equals the row_id column freshly re-read from the RAW file (all rows, same order)",
+      "expected": "152,682 equal",
+      "actual": "152,682 rows; equal",
+      "result": "PASS"
+    },
+    {
+      "check_id": "RB18",
+      "check": "Saved CSV: scale-UNDETERMINED rows have NO adjusted value in any of the 5 amount columns",
+      "expected": "0 of 73 rows",
+      "actual": "0 adjusted cells",
+      "result": "PASS"
+    },
+    {
+      "check_id": "RB19",
+      "check": "Saved CSV: duplicate tiers equal in-memory (field-match same sign / field-match sign conflict / anchors)",
+      "expected": "2332 / 1587 / 3925",
+      "actual": "2332 / 1587 / 3925",
+      "result": "PASS"
+    },
+    {
+      "check_id": "RB20",
+      "check": "Saved CSV: cost_center_owner and the other original text fields equal in-memory",
+      "expected": "equal",
+      "actual": "equal",
+      "result": "PASS"
+    },
+    {
+      "check_id": "RB25",
+      "check": "Saved CSV: sign_pattern uses only P/N/Z/_ (5 characters, never a leading + - = @)",
+      "expected": "152,332 valid",
+      "actual": "152,332 valid",
+      "result": "PASS"
+    },
+    {
+      "check_id": "RB26",
+      "check": "Saved CSV: as-reported text (*_raw source column), *_parsed, *_adj, *_status are four distinct columns for each of the 5 amounts",
+      "expected": "5 of 5",
+      "actual": "5 of 5",
+      "result": "PASS"
+    },
+    {
+      "check_id": "RB27",
+      "check": "Saved CSV: formula-leading text (= + - @) in selected free-text fields is reported (informational: raw text is preserved unchanged)",
+      "expected": "reported",
+      "actual": "0 cells",
+      "result": "PASS"
+    },
+    {
+      "check_id": "RB08",
+      "check": "Audit CSV reopens; row count equals audit rows generated",
+      "expected": "102326",
+      "actual": "102326",
+      "result": "PASS"
+    },
+    {
+      "check_id": "RB09",
+      "check": "Workbook reopens with all expected sheets in order",
+      "expected": "21",
+      "actual": "21",
+      "result": "PASS"
+    },
+    {
+      "check_id": "RB10",
+      "check": "Cleaned_Data header equals expected columns",
+      "expected": "77",
+      "actual": "77",
+      "result": "PASS"
+    },
+    {
+      "check_id": "RB11",
+      "check": "Cleaned_Data data rows equal raw rows",
+      "expected": "152682",
+      "actual": "152682",
+      "result": "PASS"
+    },
+    {
+      "check_id": "RB12",
+      "check": "Sum of actual_usd_adj in the workbook equals in-memory",
+      "expected": "2,539,833,112.6736",
+      "actual": "2,539,833,112.6736",
+      "result": "PASS"
+    },
+    {
+      "check_id": "RB13",
+      "check": "Eligible (P&L actual) rows in the workbook equal in-memory",
+      "expected": "58340",
+      "actual": "58340",
+      "result": "PASS"
+    },
+    {
+      "check_id": "RB21",
+      "check": "Workbook shows cost_center_owner (previously omitted): non-blank count equals in-memory",
+      "expected": "145841",
+      "actual": "145841",
+      "result": "PASS"
+    },
+    {
+      "check_id": "RB14",
+      "check": "First and last row_id in the workbook",
+      "expected": "R000001 ... R152682",
+      "actual": "['R000001'] ... R152682",
+      "result": "PASS"
+    },
+    {
+      "check_id": "RB15",
+      "check": "Non_Posting_Rows: data rows (non-empty rows minus title and header)",
+      "expected": "350",
+      "actual": "350",
+      "result": "PASS"
+    },
+    {
+      "check_id": "RB22",
+      "check": "Saved workbook, Count_Reconciliation: every row RECONCILED",
+      "expected": "44 x RECONCILED",
+      "actual": "44 RECONCILED / 0 DIFFERENCE",
+      "result": "PASS"
+    },
+    {
+      "check_id": "RB23",
+      "check": "Saved workbook, Schema_Map: one row per canonical CSV column",
+      "expected": "192",
+      "actual": "192",
+      "result": "PASS"
+    },
+    {
+      "check_id": "RB24",
+      "check": "Saved workbook, Transformation_Log header carries the separated count definitions",
+      "expected": "cells_processed, cells_changed, distinct_rows_affected, pct_rows_affected",
+      "actual": "cells_processed, cells_changed, distinct_rows_affected, pct_rows_affected",
+      "result": "PASS"
+    }
+  ],
+  "raw_unchanged": true,
+  "seconds": 304.4
+}

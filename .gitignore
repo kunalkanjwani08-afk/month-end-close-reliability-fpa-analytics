@@ -15,3 +15,18 @@ venv/
 # OS
 .DS_Store
 Thumbs.db
+
+# Large local-only files. The compressed *.csv.gz copies in data/ ARE committed; the decompressed
+# *.csv copies (52 MB / 174 MB) and the rebuilt DuckDB file are git-ignored on purpose.
+*.duckdb
+*.duckdb.partial
+*.duckdb.wal
+data/processed/*.csv
+data/raw/*.csv
+data/raw/*.xlsx
+*.duckdb.failed
+*.duckdb-wal
+outputs/phase4_failed_run/
+.phase4_staging_*/
+.*_staging_*/
+*.zip
