@@ -1,0 +1,349 @@
+NovaBridge — published directory tree (315 files)
+
+├── dashboard/
+│   └── README.md
+├── data/
+│   ├── processed/
+│   │   ├── QC_Report.txt
+│   │   ├── README.md
+│   │   ├── fpa_monthly_close_cleaned.csv.gz
+│   │   └── qc_summary.json
+│   └── raw/
+│       ├── README.md
+│       └── fpa_monthly_close_raw_messy.csv.gz
+├── docs/
+│   ├── ASSUMPTIONS_LIMITATIONS_AND_RISKS.md
+│   ├── DASHBOARD_USER_GUIDE.md
+│   ├── DATA_AND_CLEANING_METHODOLOGY.md
+│   ├── DATA_DICTIONARY.md
+│   ├── DATA_PROVENANCE.md
+│   ├── END_TO_END_WORKFLOW.md
+│   ├── EXCEL_FINANCIAL_ANALYSIS_GUIDE.md
+│   ├── EXECUTIVE_SUMMARY.md
+│   ├── FINANCIAL_METRICS.md
+│   ├── FINANCIAL_METRICS_AND_METHODOLOGY.md
+│   ├── PHASE4_ACCEPTANCE_REVIEW.md
+│   ├── PHASE4_ANALYSIS_REPORT.md
+│   ├── PHASE4_FILE_AUDIT_MATRIX.md
+│   ├── PHASE4_INSIGHT_REGISTER.md
+│   ├── PHASE5_REVIEW_RESPONSE.md
+│   ├── PHASE8_INDEPENDENT_REVIEW_ERRATA.md
+│   ├── PORTFOLIO_CASE_STUDY_DRAFT.md
+│   ├── PROJECT_CHANGELOG.md
+│   ├── PROJECT_FILE_CATALOG.md
+│   ├── PROJECT_OVERVIEW.md
+│   ├── PUBLICATION_DECISION.md
+│   ├── QA_AND_VALIDATION_SUMMARY.md
+│   ├── SQL_ANALYTICS_GUIDE.md
+│   └── TEST_PLAN.md
+├── excel/
+│   └── README.md
+├── outputs/
+│   ├── phase4/
+│   │   ├── MANIFEST.json
+│   │   ├── a0_grain_evidence.csv
+│   │   ├── a1_pl_period_section.csv
+│   │   ├── a2_pl_entity_section.csv
+│   │   ├── a3_pl_division_section.csv
+│   │   ├── a4_pl_gl.csv
+│   │   ├── a5_dimension_reliability.csv
+│   │   ├── a6_period_coverage.csv
+│   │   ├── a7_period_summary.csv
+│   │   ├── a8_account_mapping_consistency.csv
+│   │   ├── b10_top_cells_overlap.csv
+│   │   ├── b11_budget_pct_sensitivity.csv
+│   │   ├── b1_variance_section.csv
+│   │   ├── b2_variance_entity_gl.csv
+│   │   ├── b3_variance_division.csv
+│   │   ├── b4_variance_monthly.csv
+│   │   ├── b5_variance_volatility.csv
+│   │   ├── b6_variance_persistence.csv
+│   │   ├── b7_sign_category_profile.csv
+│   │   ├── b8_variance_bridge.csv
+│   │   ├── b9_contribution_sensitivity.csv
+│   │   ├── c1_forecast_section.csv
+│   │   ├── c2_error_attribution.csv
+│   │   ├── c3_forecast_entity.csv
+│   │   ├── c4_forecast_quarter.csv
+│   │   ├── c5_bias_persistence.csv
+│   │   ├── c6_forecast_vs_budget.csv
+│   │   ├── c7_forecast_error_cells.csv
+│   │   ├── c8_profit_proxy_bias.csv
+│   │   ├── d1_vs_py_column.csv
+│   │   ├── d2_py_growth_spread.csv
+│   │   ├── d3_true_yoy.csv
+│   │   ├── d4_py_column_reconciliation.csv
+│   │   ├── d5_small_baseline.csv
+│   │   ├── e1_gross_profit.csv
+│   │   ├── e2_gross_profit_entity.csv
+│   │   ├── e3_gross_profit_vs_budget.csv
+│   │   ├── e4_gp_variance_bridge.csv
+│   │   ├── e5_unit_value_equality.csv
+│   │   ├── e6_material_to_sales.csv
+│   │   ├── f1_cost_by_gl.csv
+│   │   ├── f2_concentration.csv
+│   │   ├── f3_cost_mix_by_year.csv
+│   │   ├── f4_cost_to_revenue.csv
+│   │   ├── f5_persistent_cells.csv
+│   │   ├── f6_salary_per_fte.csv
+│   │   ├── f7_salary_implied_fte.csv
+│   │   ├── g1_monthly_series.csv
+│   │   ├── g2_mom_yoy.csv
+│   │   ├── g3_seasonality.csv
+│   │   ├── g4_halfyear_growth.csv
+│   │   ├── g5_entity_growth.csv
+│   │   ├── g6_anomaly_scan.csv
+│   │   ├── h1_bs_coverage.csv
+│   │   ├── h2_bs_by_account.csv
+│   │   ├── h3_bs_multi_line_spread.csv
+│   │   ├── h4_bs_period_totals.csv
+│   │   ├── h5_bs_volatility.csv
+│   │   ├── h6_bs_metrics_not_computed.csv
+│   │   ├── i10_price_identity_independence.csv
+│   │   ├── i1_scenarios.csv
+│   │   ├── i2_factor_ranking.csv
+│   │   ├── i3_variance_robustness.csv
+│   │   ├── i4_undetermined_scale.csv
+│   │   ├── i5_restored_exposure.csv
+│   │   ├── i6_duplicate_exposure.csv
+│   │   ├── i7_exact_row_matches.csv
+│   │   ├── i8_flag_exposure.csv
+│   │   ├── i9_exclusion_waterfall.csv
+│   │   ├── val_analytical.csv
+│   │   ├── val_crosscheck.csv
+│   │   ├── val_exclusion_counts.csv
+│   │   └── val_load.csv
+│   ├── phase5/
+│   │   ├── MANIFEST.json
+│   │   ├── PHASE5_QA_REPORT.md
+│   │   └── fpa_month_end_close_analysis.xlsx
+│   ├── phase6/
+│   │   ├── qa_screens/
+│   │   │   ├── dark_detail.png
+│   │   │   ├── dark_drivers.png
+│   │   │   ├── dark_forecast.png
+│   │   │   ├── dark_gp.png
+│   │   │   ├── dark_insights.png
+│   │   │   ├── dark_overview.png
+│   │   │   ├── dark_quality.png
+│   │   │   ├── dark_trends.png
+│   │   │   ├── dark_variance.png
+│   │   │   ├── desktop_overview.png
+│   │   │   ├── desktop_variance.png
+│   │   │   ├── export.csv
+│   │   │   ├── export_combined.csv
+│   │   │   ├── phone_detail.png
+│   │   │   ├── phone_drivers.png
+│   │   │   ├── phone_forecast.png
+│   │   │   ├── phone_gp.png
+│   │   │   ├── phone_insights.png
+│   │   │   ├── phone_overview.png
+│   │   │   ├── phone_quality.png
+│   │   │   ├── phone_trends.png
+│   │   │   ├── phone_variance.png
+│   │   │   ├── redesign_phone.png
+│   │   │   ├── redesign_theme2_overview.png
+│   │   │   ├── scenario_phone.png
+│   │   │   ├── scenario_tablet.png
+│   │   │   ├── tablet-landscape_overview.png
+│   │   │   ├── tablet-landscape_variance.png
+│   │   │   ├── tablet_overview.png
+│   │   │   └── tablet_variance.png
+│   │   ├── DASHBOARD_QA_REPORT.md
+│   │   ├── fpa_financial_analytics_dashboard.html
+│   │   ├── negative_controls.json
+│   │   ├── payload_stats.json
+│   │   ├── qa_print_preview.pdf
+│   │   └── qa_results.json
+│   └── phase7/
+│       ├── evidence/
+│       │   ├── dashboard/
+│       │   │   ├── costonly_observations.txt
+│       │   │   ├── print_preview_phase7.pdf
+│       │   │   ├── revenueonly_observations.txt
+│       │   │   ├── s0_default.png
+│       │   │   ├── s15_empty.png
+│       │   │   ├── s1_year2024.png
+│       │   │   ├── s5_cost_only.png
+│       │   │   ├── theme_toggled.png
+│       │   │   ├── width_1024.png
+│       │   │   ├── width_1920.png
+│       │   │   ├── width_390.png
+│       │   │   └── width_768.png
+│       │   ├── originals_before_correction/
+│       │   │   └── HOW_TO_RUN.txt
+│       │   ├── work/
+│       │   │   ├── xlsx_recalc/
+│       │   │   │   ├── recalculated/
+│       │   │   │   │   └── workbook_copy.xlsx
+│       │   │   │   └── workbook_copy.xlsx
+│       │   │   ├── amount_format_counts.csv
+│       │   │   ├── checks_assumptions.json
+│       │   │   ├── checks_dashboard.json
+│       │   │   ├── checks_excel.json
+│       │   │   ├── checks_financial_sql.json
+│       │   │   ├── checks_financial_sql_mutant_cent.json
+│       │   │   ├── checks_financial_sql_mutant_drop_row.json
+│       │   │   ├── checks_financial_sql_mutant_status.json
+│       │   │   ├── checks_lineage.json
+│       │   │   ├── checks_pipeline.json
+│       │   │   ├── checks_security.json
+│       │   │   ├── checks_sql.json
+│       │   │   ├── cleaned_xlsx_vs_csv.json
+│       │   │   ├── exclusions_bs_actual.csv
+│       │   │   ├── exclusions_pl_actual.csv
+│       │   │   ├── exclusions_pl_variance.csv
+│       │   │   ├── gap_16352_breakdown.csv
+│       │   │   ├── payload_meta.json
+│       │   │   ├── raw_preservation.csv
+│       │   │   ├── ref_cost_centre.csv
+│       │   │   ├── ref_metrics.json
+│       │   │   ├── security_scan_hits.csv
+│       │   │   ├── summary_for_report.json
+│       │   │   └── waterfall.csv
+│       │   └── sha256_before_phase7.txt
+│       ├── test_execution_logs/
+│       │   ├── cleaner_rerun/
+│       │   │   ├── cleaner_run.json
+│       │   │   └── cleaner_stdout.log
+│       │   ├── corrected_instructions_regression/
+│       │   │   ├── 00_processed_before.txt
+│       │   │   ├── 01_clean_documented.json
+│       │   │   ├── 01_clean_documented.log
+│       │   │   ├── 01_clean_sha.txt
+│       │   │   ├── 02_pipeline.json
+│       │   │   ├── 02_pipeline.log
+│       │   │   ├── 03_report.json
+│       │   │   ├── 03_report.log
+│       │   │   ├── 04_pytest_documented.json
+│       │   │   ├── 04_pytest_documented.log
+│       │   │   ├── 05_phase5.json
+│       │   │   ├── 05_phase5.log
+│       │   │   ├── 06_pytest_phase5.json
+│       │   │   └── 06_pytest_phase5.log
+│       │   ├── isolated_rerun/
+│       │   │   ├── 01_phase4_pipeline.json
+│       │   │   ├── 01_phase4_pipeline.log
+│       │   │   ├── 02_phase4_report.json
+│       │   │   ├── 02_phase4_report.log
+│       │   │   ├── 03_pytest_phase4_phase5.json
+│       │   │   ├── 03_pytest_phase4_phase5.log
+│       │   │   ├── 04_phase5_excel.json
+│       │   │   ├── 04_phase5_excel.log
+│       │   │   ├── 05_pytest_phase5.json
+│       │   │   ├── 05_pytest_phase5.log
+│       │   │   ├── 06_phase5_qa_report.json
+│       │   │   ├── 06_phase5_qa_report.log
+│       │   │   ├── 07_phase6_build.json
+│       │   │   ├── 07_phase6_build.log
+│       │   │   ├── 08_phase6_qa.json
+│       │   │   ├── 08_phase6_qa.log
+│       │   │   ├── 09_phase6_negative_controls.json
+│       │   │   └── 09_phase6_negative_controls.log
+│       │   ├── p7_assumptions.log
+│       │   ├── p7_cleaned_xlsx.log
+│       │   ├── p7_dashboard.log
+│       │   ├── p7_excel.log
+│       │   ├── p7_financial.log
+│       │   ├── p7_financial_negative_control_cent.log
+│       │   ├── p7_financial_negative_control_drop_row.log
+│       │   ├── p7_financial_negative_control_status.log
+│       │   ├── p7_lineage.log
+│       │   ├── p7_pipeline_checks.log
+│       │   ├── p7_security.log
+│       │   └── p7_sql.log
+│       ├── DATA_LINEAGE_RECONCILIATION.xlsx
+│       ├── FINANCIAL_RECONCILIATION.xlsx
+│       ├── ISSUE_LOG.xlsx
+│       ├── PHASE7_QA_REPORT.md
+│       ├── file_manifest_sha256.txt
+│       └── qa_results.json
+├── reports/
+│   ├── phase8/
+│   │   ├── PHASE8_DOCUMENTATION_QA_REPORT.md
+│   │   ├── PHASE8_FINAL_DOCUMENTATION_QA.md
+│   │   ├── PHASE8_UPDATED_FILE_MANIFEST_SHA256.txt
+│   │   └── README_PHASE8_DRAFT.md
+│   └── phase9/
+│       ├── superseded_restricted_release_plan/
+│       │   ├── APPROVED_PUBLIC_FILE_INVENTORY_V2.csv
+│       │   ├── APPROVED_SOURCE_VERSION_REPORT.md
+│       │   ├── EXCLUDED_FILES_AND_REASONS_V2.md
+│       │   ├── PHASE9_V2_FINAL_SUMMARY.md
+│       │   ├── PHASE9_V2_REMEDIATION_REPORT.md
+│       │   ├── PUBLIC_DATA_DERIVED_CONTENT_REGISTER.csv
+│       │   ├── PUBLIC_RELEASE_MANIFEST_SHA256.txt
+│       │   ├── PUBLIC_RELEASE_SECURITY_REPORT_V2.md
+│       │   ├── PUBLIC_SOURCE_MODIFICATION_REGISTER.md
+│       │   ├── V1_V2_FILE_CHANGE_REGISTER.csv
+│       │   ├── V2_RELEASE_CHECKLIST.md
+│       │   └── V2_TEST_ENVIRONMENT_REPORT.md
+│       ├── test_logs/
+│       │   ├── 00_venv.log
+│       │   ├── 01_pip_install.log
+│       │   ├── 02_pip_check.log
+│       │   ├── 03_compileall.log
+│       │   ├── 04_pytest_fixture.log
+│       │   ├── 05_phase4_pipeline.log
+│       │   ├── 06_pytest_phase4_full.log
+│       │   ├── 07_phase5_excel.log
+│       │   ├── 08_pytest_phase5.log
+│       │   ├── 10_phase6_dashboard_qa.log
+│       │   └── status.txt
+│       ├── DIRECTORY_TREE.txt
+│       ├── DOCUMENT_EDIT_REGISTER.csv
+│       ├── EXCLUDED_FILES_AND_REASONS.md
+│       ├── PHASE9_VALIDATION_REPORT.md
+│       ├── PUBLICATION_INVENTORY.csv
+│       └── PUBLICATION_MANIFEST_SHA256.txt
+├── sql/
+│   ├── phase4/
+│   │   ├── 01_dimensions_and_views.sql
+│   │   ├── 02_grain_and_overview.sql
+│   │   ├── 03_load_validation.sql
+│   │   ├── 04_budget_variance.sql
+│   │   ├── 05_forecast_error.sql
+│   │   ├── 06_prior_year.sql
+│   │   ├── 07_gross_profit.sql
+│   │   ├── 08_cost_structure.sql
+│   │   ├── 09_trend_volatility.sql
+│   │   ├── 10_balance_sheet.sql
+│   │   ├── 11_dq_exposure_scenarios.sql
+│   │   └── 99_analytical_validation.sql
+│   └── README.md
+├── src/
+│   ├── clean_fpa_monthly_close.py
+│   ├── phase4_crosscheck.py
+│   ├── phase4_pipeline.py
+│   ├── phase4_report.py
+│   ├── phase5_excel.py
+│   ├── phase6_core.js
+│   ├── phase6_dashboard.py
+│   ├── phase6_report.py
+│   ├── phase6_style.css
+│   ├── phase6_template.html
+│   └── phase6_views.js
+├── tests/
+│   ├── phase7/
+│   │   ├── p7_assumptions.py
+│   │   ├── p7_cleaned_xlsx.py
+│   │   ├── p7_common.py
+│   │   ├── p7_dashboard.py
+│   │   ├── p7_excel.py
+│   │   ├── p7_financial.py
+│   │   ├── p7_lineage.py
+│   │   ├── p7_pipeline_checks.py
+│   │   ├── p7_report.py
+│   │   ├── p7_report_md.py
+│   │   ├── p7_security.py
+│   │   └── p7_sql.py
+│   ├── conftest.py
+│   ├── phase6_dashboard_qa.py
+│   ├── phase6_negative_controls.py
+│   ├── test_phase4.py
+│   ├── test_phase4_units.py
+│   └── test_phase5_excel.py
+├── .gitignore
+├── HOW_TO_RUN.txt
+├── README.md
+└── requirements.txt

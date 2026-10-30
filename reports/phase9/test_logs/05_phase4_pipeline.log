@@ -1,0 +1,21 @@
+[1/4] input verified: /tmp/vt/data/processed/fpa_monthly_close_cleaned.csv
+      sha256=c184b677bacc6f23086e3b5eedd71836643cb75064e428a1ebfee4c075fa9b47
+      174,545,248 bytes, 192 columns
+[2/4] database built (10s): stg_close_raw + fact_close loaded
+      01_dimensions_and_views.sql: 12 statements, 0.07s
+      02_grain_and_overview.sql: 9 statements, 0.51s
+      03_load_validation.sql: 2 statements, 0.63s
+      04_budget_variance.sql: 13 statements, 0.36s
+      05_forecast_error.sql: 9 statements, 0.19s
+      06_prior_year.sql: 6 statements, 0.21s
+      07_gross_profit.sql: 9 statements, 0.19s
+      08_cost_structure.sql: 7 statements, 0.16s
+      09_trend_volatility.sql: 6 statements, 0.12s
+      10_balance_sheet.sql: 6 statements, 0.09s
+      11_dq_exposure_scenarios.sql: 11 statements, 1.1s
+      99_analytical_validation.sql: 1 statements, 0.22s
+[3/4] SQL complete
+      independent pandas cross-check: 124 figures recomputed
+[4/4] validated and promoted 72 output tables to /tmp/vt/outputs/phase4
+database: /tmp/vt/data/processed/phase4_fpa.duckdb
+FINISHED in 19s

@@ -62,3 +62,12 @@ To verify: on Windows PowerShell run `Get-FileHash -Algorithm SHA256 data\raw\fp
 2. Whether any licence or terms apply, and whether the file may be published in a public repository.
 3. That the file contains no real company, customer or personal data.
 4. Whether the person names in `cost_center_owner` are fictional.
+
+
+## Phase 9 update (30 Oct 2026): owner decision to publish
+
+* The project owner states that he created the NovaBridge project and its synthetic dataset for portfolio and learning purposes, and decided to publish the complete project including the raw and cleaned datasets.
+* This is an **owner statement**. The generator, seed, creation date and any licence of the file are still **not recorded**, and nothing here has been checked against an external source.
+* The data contains eight person-like cost-centre owner names (initial + surname) and eight generic system user IDs. No email address, phone number or URL appears in any column checked (30 Oct 2026). The names are treated as fictional because the group is fictional; that is not proven.
+* The raw and cleaned files are stored GZIP-compressed (lossless; hashes in `data/raw/README.md` and `data/processed/README.md`).
+* No open-source licence is granted. The statements above in this document that were written before this decision (for example "do not assume permission to redistribute") are kept as the historical record.

@@ -1,0 +1,2 @@
+tests/phase6_dashboard_qa.py:955: SyntaxWarning: invalid escape sequence '\d'
+  const parse=c=>{const m=c.match(/[\d.]+/g).map(Number);const a=m.length>3?m[3]:1;const rgb=c.startsWith('color(')?m.slice(0,3).map(x=>x*255):m.slice(0,3);return [rgb[0],rgb[1],rgb[2],a]};

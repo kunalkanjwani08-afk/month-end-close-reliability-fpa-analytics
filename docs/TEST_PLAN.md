@@ -1,7 +1,18 @@
 # Test Plan
 
-**Status: plan only. No test is implemented in this commit.**
+**Status: partly implemented. Phase 4 has automated tests (below); the rest of this plan is still planned. No CI workflow exists.**
 Each section says what will be tested and how. Rules named here (cleaning, duplicates, scale, signs) are written down **before** the code that applies them, and the tests check the code against those written rules, not against the code's own output.
+
+## Status at a glance (last verified by running them on Linux, Python 3.13, DuckDB 2.0.0)
+
+| Area | State | Where |
+|---|---|---|
+| Phase 4 fixture tests (no private data): input gates, sign categories, `safe_pct`/`robust_z`/`anomaly_class`, gross-profit treatments on a hand-computed fixture, check-ID uniqueness, fail-closed validation (FAIL, NULL status, duplicate and NULL IDs, missing/empty validation tables), staged promotion, failure diagnostics, cleanup not hiding the root exception, promotion-failure cases | **Implemented, 42 tests** | `tests/test_phase4_units.py` |
+| Phase 4 full-data tests: load, schema, 55+24+86+124 validation rows, independent pandas cross-check, manifest vs files, determinism, mutation tests, report generator | **Implemented, 32 tests; need the private canonical cleaned CSV** (skipped, and the run reported INCOMPLETE with exit code 1, when it is absent) | `tests/test_phase4.py`, `tests/conftest.py` |
+| Cleaning-script (Phase 3) unit tests, Excel/Python/SQL reconciliation tests, dashboard tests | **Planned, not implemented** | sections 1-2, 9, 12 below |
+| Continuous integration | **Not implemented.** There is no workflow file (`.github/workflows/` holds only a placeholder) and nothing has run on GitHub Actions | section CI below |
+
+Duplicates: the pipeline does **not** remove duplicate rows. Duplicate candidates are flagged and retained, and the effect of excluding them is shown as a sensitivity scenario (`out_i6_duplicate_exposure`). Section 3 below describes the original Phase 1 plan; read it as a plan for the cleaning stage, not as current behaviour.
 
 Data: `data/raw/fpa_monthly_close_raw_messy.csv` (synthetic, 43 columns, 152,682 data rows).
 
@@ -15,7 +26,7 @@ Data: `data/raw/fpa_monthly_close_raw_messy.csv` (synthetic, 43 columns, 152,682
 
 ## 3. Duplicate records
 - **What:** a true duplicate versus legitimate journal lines that share a `document_no`.
-- **How:** the duplicate key is defined in writing. Controlled fixtures contain (a) an exact repeat that must be removed, (b) two lines of one journal that must both stay, (c) a near-duplicate that must be flagged for review. Row counts before and after are reconciled: kept + removed + flagged = input. A removed duplicate is one primary exclusion reason in the row accounting of section 11.
+- **How:** the duplicate key is defined in writing. Controlled fixtures contain (a) an exact repeat that must be flagged as a duplicate candidate (the Phase 4 pipeline keeps it and quantifies the effect of excluding it; any removal needs an explicit written rule), (b) two lines of one journal that must both stay, (c) a near-duplicate that must be flagged for review. Row counts before and after are reconciled: kept + removed (only if a removal rule is ever adopted) + flagged = input. A removed duplicate would be one primary exclusion reason in the row accounting of section 11.
 
 ## 4. Missing values
 - **What:** required fields must be present. Blanks are allowed where the field does not apply (for example a cost center on a balance-sheet line).
@@ -59,4 +70,4 @@ Data: `data/raw/fpa_monthly_close_raw_messy.csv` (synthetic, 43 columns, 152,682
 After any code change, rerun every test that already passed. A previously passing test that fails is investigated before new work continues.
 
 ## CI
-GitHub Actions will run the full suite on every push and every pull request. **Not included in this commit.** The workflow file is added at a later stage.
+GitHub Actions is the intended runner for the fixture suite on every push and pull request. **It does not exist yet:** no workflow file has been written and no CI run has ever happened, so no claim of CI-verified results is made anywhere in this repository. The full-data tests cannot run on GitHub Actions at all while the cleaned CSV stays private; CI would run the fixture tests only, and a run would have to be reported as such.

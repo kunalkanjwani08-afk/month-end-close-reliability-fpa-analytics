@@ -1,0 +1,50 @@
+file,line_or_section,finding_type,generic_methodology_vs_source_derived,risk_level,action_taken,verification
+src/clean_fpa_monthly_close.py (V1),whole file,Inferred product-family price map; entity/product names and codes; scale-calibration references,SOURCE_DERIVED,HIGH,File EXCLUDED from V2; replaced by generic src/fpa_cleaning_toolkit.py,File absent from V2 inventory; toolkit scanned clean
+src/phase5_excel.py (V1),whole file,"Dataset-specific workbook layout, labels and expected result structure",SOURCE_DERIVED,HIGH,File EXCLUDED; synthetic src/excel_variance_demo.py published instead,File absent; demo uses seeded invented data
+src/phase4_report.py (V1),narrative strings,"Result-specific narrative, uniform target wording, figures",SOURCE_DERIVED,HIGH,File EXCLUDED (V1 had reworded one sentence only),File absent
+src/phase6_report.py (V1),narrative strings,Result-specific narrative,SOURCE_DERIVED,MEDIUM,File EXCLUDED,File absent
+src/phase4_pipeline.py,module constants,"Expected source hash, row count, column count, header hash",SOURCE_DERIVED,HIGH,"Moved to private config (config/private_config.json, git-ignored); loader fails closed with no defaults",tests: missing/null config stop with ConfigError; scan: no 64-hex value
+src/phase4_pipeline.py,module constants / build_database,"Account numbers (discount, sales, materials, salary)",SOURCE_DERIVED,MEDIUM,Moved to private config; exposed to SQL as cfg_params table,Empty-schema SQL smoke test binds all 12 scripts
+src/phase4_pipeline.py,"docstring, messages",Dataset-specific wording,SOURCE_DERIVED,LOW,Made generic,Scan
+src/phase4_crosscheck.py,run_crosscheck,"Hard-coded entity code, account numbers, year list",SOURCE_DERIVED,MEDIUM,Replaced by config values or values derived from the input (first sorted entity; years from data),py_compile; unit fixtures
+src/phase4_crosscheck.py,comment,Reference to a named finding headline,SOURCE_DERIVED,LOW,Comment reworded,Scan
+src/phase6_dashboard.py,salary account,Hard-coded account number,SOURCE_DERIVED,MEDIUM,Read from private config and passed to the page in the payload,py_compile
+src/phase6_dashboard.py,paths in docstring/constants,"Relative private paths (data/, outputs/) of withheld files",SOURCE_DERIVED,LOW,Kept as relative paths to files that are not distributed; builder documented as not runnable from the repo,DASHBOARD_USER_GUIDE section 1
+src/phase6_core.js,GL4190 constant,Hard-coded discount account number,SOURCE_DERIVED,MEDIUM,Resolved from payload cfg.discountGl,node --check
+src/phase6_core.js,labels,Account-specific explanatory text,SOURCE_DERIVED,LOW,"Made generic (""the discount account"")",node --check; scan
+src/phase6_views.js,Populations line,Hard-coded baseline population count,SOURCE_DERIVED,HIGH,Line removed,Scan for count patterns
+src/phase6_views.js,account text,Account numbers in explanatory text,SOURCE_DERIVED,LOW,Made generic,Scan
+src/phase6_views.js,budget insight hypothesis,Hypothesis echoing an observed uniform-budget-gap pattern,SOURCE_DERIVED,MEDIUM,Replaced with a neutral untested hypothesis,node --check; grep
+src/phase6_views.js,persistence / guard thresholds,90% / 3% / >=12 months / 0.5% / 50% guard,GENERIC_METHODOLOGY,LOW,"Kept; documented as project conventions, not learned values",FINANCIAL_METRICS section 8
+src/phase6_template.html,header/footer text,Hard-coded line count,SOURCE_DERIVED,MEDIUM,Removed,Scan
+sql/phase4/03_load_validation.sql,"L38-L47, L51",Expected-count baselines and a 32-account constant,SOURCE_DERIVED,HIGH,"Replaced by structural checks (distinct-count, partition) and invariants",Empty-schema SQL smoke test; scan
+"sql/phase4/07_gross_profit.sql, 08, 11",GL literals,Account numbers as literals,SOURCE_DERIVED,MEDIUM,Replaced by SELECT from cfg_params,SQL smoke test
+sql/phase4/99_analytical_validation.sql,expected counts,"Hard-coded expected counts, entity and year literals",SOURCE_DERIVED,HIGH,Replaced by recounts from fact_close and derived entity/year values,SQL smoke test binds; results NOT verified (empty data)
+sql/phase4/*.sql,comments,"Observed-result remarks, dataset-specific population remarks",SOURCE_DERIVED,MEDIUM,"De-identified; remaining ""Phase"" mentions are stage names only","grep for years, counts, hashes"
+sql/phase4/09_trend_volatility.sql,G4 comment,A tested reading of a year-specific trend,SOURCE_DERIVED,MEDIUM,Comment text removed,grep
+sql/phase4/*.sql,"thresholds, tolerances","Tolerance shares (0.5%, 5%), 1.4826 MAD constant, 0.99/0.80 reliability cut-offs",GENERIC_METHODOLOGY,LOW,Kept as method parameters,Documented in SQL guide
+sql/phase4/*.sql,scale factor values 1000/100000 and decision labels,Structure of the private scale-restoration scheme,SOURCE_DERIVED,LOW,"KEPT: shows rule structure, not any data result. CONDITIONAL; owner to confirm",Owner review item O-3
+"sql/phase4/*.sql, src/phase4_crosscheck.py","section/account-group labels (e.g. REVENUE, COGS)",Structural labels of the extract schema,GENERIC_METHODOLOGY,LOW,KEPT; CONDITIONAL,Owner review item O-3
+tests/test_phase4_units.py,fixtures,Ids and values taken from the private data,SOURCE_DERIVED,MEDIUM,Replaced by invented ids (9901-9904); ID floor comment added,pytest: all pass
+docs/FINANCIAL_METRICS_AND_METHODOLOGY.md,whole file,V1 contained population counts and result remarks,SOURCE_DERIVED,HIGH,Fully rewritten as formulas and conventions only,Scan; manual read
+docs/SQL_ANALYTICS_GUIDE.md,whole file,V1 contained validation baselines and population counts,SOURCE_DERIVED,HIGH,Fully rewritten; explains SQL baseline vs JavaScript dynamic calculation,Scan; manual read
+docs/DATA_AND_CLEANING_METHODOLOGY.md,whole file,"V1 contained inferred prices, restoration outcomes, junk entity names/codes, system-label breakdown, FX anomaly statistics, duplicate and sign statistics",SOURCE_DERIVED,HIGH,Fully rewritten as generic method; no claim that ERP origin is verified,Scan; manual read
+docs/ASSUMPTIONS_LIMITATIONS_AND_RISKS.md,17 items,"Counts, percentages and populations attached to each risk",SOURCE_DERIVED,HIGH,Rewritten: risk types and handling only,Scan; manual read
+docs/PROJECT_OVERVIEW.md,"sections 3,5,6,8,9","Row/column counts, hashes, population splits, key findings table",SOURCE_DERIVED,HIGH,Rewritten; findings section states none are published,Scan
+docs/EXECUTIVE_SUMMARY.md,findings,"Six numbered findings (status-rule effect, uniform budget gap, forecast-error location, GP range, cost concentration, restoration effect)",SOURCE_DERIVED,HIGH,Findings removed; method only,Scan; manual read
+docs/DASHBOARD_USER_GUIDE.md,"KPIs, defaults","Default KPI population count, payload description, load time",SOURCE_DERIVED,MEDIUM,Rewritten; states dashboard is withheld,Scan
+docs/QA_AND_VALIDATION_SUMMARY.md,"sections 5,8,9","Population splits, gap counts, flag counts, run timings, issue-specific counts",SOURCE_DERIVED,HIGH,Rewritten; kept 780/774/1/1/4/43; states full reconciliation not reproducible from the public repo,Scan; manual read
+docs/PORTFOLIO_CASE_STUDY.md,"sections 1,2,4","Record counts, observed patterns",SOURCE_DERIVED,HIGH,"Rewritten, honest, no data-derived patterns",Scan
+docs/END_TO_END_WORKFLOW.md,"diagram, stages, folder tree","Private DB sizes, hashes, eligible populations, local paths",SOURCE_DERIVED,HIGH,Rewritten; diagram re-rendered,Scan
+docs/EXCEL_FINANCIAL_ANALYSIS_GUIDE.md,section 1,"Sheet, table, chart and formula counts; workbook hash",SOURCE_DERIVED,MEDIUM,Rewritten around synthetic demo,Scan
+"docs/PROJECT_FILE_CATALOG.md, PROJECT_CHANGELOG.md",tables,Counts of result tables/views/checks,SOURCE_DERIVED,MEDIUM,Rewritten,Scan
+README.md,several,"Fictional-entity count, record counts, ""deliberately messy, simulated"", test count, reproducibility overstatement",SOURCE_DERIVED,HIGH,Rewritten; keeps first-person and AI-assistance transparency; adds Data availability statement and licence explanation,Scan; manual read
+assets/architecture_diagram.*,node labels,"Row/column counts, formula count, tab count, file names of excluded files",SOURCE_DERIVED,MEDIUM,"Re-rendered from new .mmd (mermaid-cli, Chromium)",PNG viewed; SVG text grep
+config/private_config.template.json,all values,Placeholders,GENERIC_METHODOLOGY,LOW,All values null,Loader rejects nulls (test)
+src/fpa_cleaning_toolkit.py,whole file,Generic parsing/mapping/duplicate/peer-screen helpers; no defaults for calibration,GENERIC_METHODOLOGY,LOW,Independently written; calibration must be supplied,74 fixture tests incl. toolkit
+src/excel_variance_demo.py,whole file,Seeded synthetic data,GENERIC_METHODOLOGY,LOW,Labelled ILLUSTRATIVE on every sheet,Tests; LibreOffice recalc once
+requirements.txt,comments,Over-broad compatibility claim,GENERIC_METHODOLOGY,LOW,Corrected to tested environment only,Fresh venv install + pip check
+.gitignore,patterns,n/a,GENERIC_METHODOLOGY,LOW,Hardened,Verified in a scratch copy with git add -n (no commit): private config, csv, xlsx, duckdb, .env, outputs/ ignored; template and sources included
+docs/* and README,QA headline numbers,780 executed / 774 PASS / 1 FAIL / 1 BLOCKED / 4 NOT TESTED / 43 INFO,GENERIC_METHODOLOGY,LOW,"KEPT per owner brief: these describe the QA process, not data results",Owner-approved retention
+docs/*,"metric formulas, thresholds","Variance, WAPE, bias, HHI, robust z, guards",GENERIC_METHODOLOGY,LOW,KEPT: safely demonstrable methodology,FINANCIAL_METRICS
+docs/ and README,"project name ""NovaBridge""",Project/brand label of fictional context,GENERIC_METHODOLOGY,LOW,KEPT; owner to confirm it is not a real organisation name (O-4),Owner review item O-4
