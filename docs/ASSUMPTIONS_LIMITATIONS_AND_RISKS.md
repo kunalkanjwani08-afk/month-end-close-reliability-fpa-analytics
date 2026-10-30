@@ -146,6 +146,7 @@ Items 14 and 17 were conditions named by independent validation. Item 17 is reso
 ### 14. Windows reproducibility remains untested
 
 - **What was done.** A fresh virtual environment was built on Linux (Python 3.13) from `requirements.txt` exactly as pinned (pandas 3.0.5, numpy 2.4.6, openpyxl 3.1.5, XlsxWriter 3.2.9, duckdb 2.0.0, pytest 9.2.0); `pip check` was clean. In it the cleaner regenerated the cleaned CSV byte-identically (SHA-256 `c184b677...`), the SQL pipeline passed, and 125 tests passed with 0 failed and 0 skipped (including the LibreOffice-based Excel tests). A GitHub Actions workflow runs the fixture tests and a full-data reproduction on a clean Ubuntu runner.
+- **Observed in CI.** On GitHub-hosted runners the regenerated cleaned CSV was byte-identical to the reference in some runs and 73 bytes larger (different SHA-256) in others; cause not established. CI reports the comparison and does not enforce byte equality.
 - **What is still uncertain.** No Windows run was done, although the owner works on Windows with VS Code. The cleaner takes about 4-5 minutes and about 1.25 GB of memory.
 - **What cannot safely be concluded.** That the project installs and runs on Windows; that `requirements.txt` is complete for the browser QA (Playwright and LibreOffice, used only for QA, are not listed).
 - **Evidence that would resolve it.** The documented run on the Windows laptop, with `pip check`.
