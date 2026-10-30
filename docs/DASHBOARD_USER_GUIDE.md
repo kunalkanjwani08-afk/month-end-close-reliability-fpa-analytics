@@ -2,20 +2,19 @@
 
 **Month-End Close Reliability & Financial Performance Analytics**
 
-> **Status (updated at Phase 9 publication, 30 Oct 2026):** published as part of the complete project. The owner decided to publish the whole project, including the dataset he describes as synthetic. Dataset provenance and redistribution rights remain **owner-stated and not independently verified**. Any wording below from Phase 8 that calls the release *blocked*, *draft* or *not approved* describes the Phase 8 state and is superseded by [PUBLICATION_DECISION.md](PUBLICATION_DECISION.md). No calculation, figure or finding was changed.
 > **Data:** fictional NovaBridge Industries; owner-described as synthetic. The dashboard embeds line-level data and should not be shared until provenance, licence and sensitivity are reviewed.
 > **Evidence labels:** Verified / Owner-stated / Assumption / Unresolved.
-> **Testing boundary:** tested in headless **Chromium** only (Phase 6 and Phase 7). Not tested: Firefox, Safari, screen readers or other assistive technology, a physical printer, Microsoft Excel (not relevant here), Windows.
+> **Testing boundary:** tested in headless **Chromium** only (Dashboard and independent validation). Not tested: Firefox, Safari, screen readers or other assistive technology, a physical printer, Microsoft Excel (not relevant here), Windows.
 
-Related: [Metrics](FINANCIAL_METRICS_AND_METHODOLOGY.md) · [QA summary](QA_AND_VALIDATION_SUMMARY.md) · [Risks](ASSUMPTIONS_LIMITATIONS_AND_RISKS.md)
+Related: [Metrics](FINANCIAL_METRICS.md) · [Risks](ASSUMPTIONS_LIMITATIONS_AND_RISKS.md)
 
 ---
 
 ## 1. What it is
 
-[`outputs/phase6/fpa_financial_analytics_dashboard.html`](../outputs/phase6/fpa_financial_analytics_dashboard.html) is a single standalone HTML file (7,317,802 bytes) with embedded CSS, JavaScript and data. It loads no external resources. It is built from [`src/phase6_dashboard.py`](../src/phase6_dashboard.py) with `phase6_template.html`, `phase6_style.css`, `phase6_core.js` and `phase6_views.js`.
+[`dashboard/fpa_financial_analytics_dashboard.html`](../dashboard/fpa_financial_analytics_dashboard.html) is a single standalone HTML file (7,317,802 bytes) with embedded CSS, JavaScript and data. It loads no external resources. It is built from [`src/dashboard_builder.py`](../src/dashboard_builder.py) with `dashboard_template.html`, `dashboard_style.css`, `dashboard_core.js` and `dashboard_views.js`.
 
-It lets a reviewer explore the Phase 4 results under filters and assumption scenarios. It is a review tool for a simulated extract, not a decision system.
+It lets a reviewer explore the SQL analysis results under filters and assumption scenarios. It is a review tool for a simulated extract, not a decision system.
 
 ## 2. Opening it
 
@@ -40,7 +39,7 @@ It lets a reviewer explore the Phase 4 results under filters and assumption scen
 | 4 | **Forecast & Prior-Year** | Forecast and budget accuracy by population, WAPE by quarter, where the forecast error sits (opposite-sign lines), actual versus the dataset's prior-year column |
 | 5 | **Drivers & Concentration** | Ranked cost accounts and Pareto by GL; cost-centre view (People + Opex); concentration (share, HHI); cost mix and cost-to-revenue by year; persistent one-sided deviations; salary per FTE |
 | 6 | **Gross Profit & Scenarios** | Gross profit under the three discount treatments (S1, S2, S3) with a row-set toggle; gross margin by year; gross profit by entity; gross profit versus budget on same-sign lines; sensitivity of the headline to unresolved assumptions |
-| 7 | **Insights & Actions** | Dynamic insights recomputed for the current selection (observation, scope, calculation, drivers, evidence, confidence, hypothesis, action, evidence needed, monitoring) and fixed Phase 4 findings labelled as portfolio-level (they do not change with filters) |
+| 7 | **Insights & Actions** | Dynamic insights recomputed for the current selection (observation, scope, calculation, drivers, evidence, confidence, hypothesis, action, evidence needed, monitoring) and fixed SQL analysis findings labelled as portfolio-level (they do not change with filters) |
 | 8 | **Data Quality & Methodology** | Data readiness gate, row accounting for all source rows, flag exposure, journal-status diagnostic for the current selection, metric dictionary, open assumptions, provenance and file details, baseline reconciliation |
 | 9 | **Detail Lines** | Line-level table with search, sort and pagination (50 rows per page) |
 
@@ -54,16 +53,16 @@ It lets a reviewer explore the Phase 4 results under filters and assumption scen
 | Revenue vs budget | Actual − budget on lines with a budget (net variance, with a guarded %) | see dashboard |
 | Cost base vs budget | Same for the cost sections | see dashboard |
 
-Default values are for 58,340 lines with all filters off. They match the independent reference within a cent (Phase 6 and Phase 7).
+Default values are for 58,340 lines with all filters off. They match the independent reference within a cent (Dashboard and independent validation).
 
 ## 6. Filters and controls
 
 | Control | Behaviour | Tested |
 |---|---|---|
-| Year and quarter chips | Toggle periods | Phase 6, Phase 7 (Chromium) |
+| Year and quarter chips | Toggle periods | Dashboard, independent validation (Chromium) |
 | From / To month | Month range | Yes |
 | Entity, Division, Section, GL account, Cost centre | Searchable multi-select; cost centre includes "(no cost centre)" | Yes |
-| Variance-comparison population | All comparable / same-sign / opposite-sign / zero-involved. **Changes only:** Budget & Variance, the Executive variance KPI, the prior-year comparison table and the variance insights. **Does not change:** forecast accuracy, line counts, revenue and cost KPIs, gross profit or data-quality tables (authority: `src/phase6_core.js` note text and `sVar` wiring; `fcPops()` does not read the selector) | Yes |
+| Variance-comparison population | All comparable / same-sign / opposite-sign / zero-involved. **Changes only:** Budget & Variance, the Executive variance KPI, the prior-year comparison table and the variance insights. **Does not change:** forecast accuracy, line counts, revenue and cost KPIs, gross profit or data-quality tables (authority: `src/dashboard_core.js` note text and `sVar` wiring; `fcPops()` does not read the selector) | Yes |
 | Scale basis | Adjusted all (baseline) / as reported / restore HIGH confidence only / exclude MEDIUM / exclude all restored | Yes |
 | Duplicate candidates | Retained (baseline) / exclude same-sign candidates / exclude all copy candidates | Yes |
 | Sign handling | As recorded (baseline) / all-non-negative rows only / exclude single-column sign flips | Yes |
@@ -90,7 +89,7 @@ The dashboard does not use one population on every page.
 | Non-Posted lines, embedded for the status diagnostic | 77,990 | The journal-status table on the Data Quality tab only |
 | Balance-sheet lines | 2,953 | Described in the workbook and SQL; never added to the P&L |
 
-**Hidden population (ISS-18, documented, not corrected).** 152,682 source rows − 58,340 Posted-eligible − 77,990 non-Posted diagnostic = 16,352. Of these, 4,996 lines have a status other than Posted and also lack an actual amount (4,958) or have an undetermined scale (38). They are counted in the row accounting and the Phase 4 waterfall, but they are **in no dashboard view** and not in the journal-status diagnostic, because the diagnostic population drops only the status gate and these lines fail another gate. The remaining 11,356 (7,041 Posted and 4,315 non-Posted) fail a non-status gate: non-posting rows, junk or unresolvable entities, balance-sheet statement, missing actual amount (Posted lines) or undecidable scale (Posted lines). Phase 7 verified the arithmetic.
+**Hidden population (ISS-18, documented, not corrected).** 152,682 source rows − 58,340 Posted-eligible − 77,990 non-Posted diagnostic = 16,352. Of these, 4,996 lines have a status other than Posted and also lack an actual amount (4,958) or have an undetermined scale (38). They are counted in the row accounting and the SQL analysis waterfall, but they are **in no dashboard view** and not in the journal-status diagnostic, because the diagnostic population drops only the status gate and these lines fail another gate. The remaining 11,356 (7,041 Posted and 4,315 non-Posted) fail a non-status gate: non-posting rows, junk or unresolvable entities, balance-sheet statement, missing actual amount (Posted lines) or undecidable scale (Posted lines). independent validation verified the arithmetic.
 
 The fixed **revenue populations** in the forecast tab are population A (matched same-sign, 24,372 lines), B (comparable, 29,131) and C (all forecast, 30,879).
 
@@ -120,14 +119,14 @@ Not shown because the data cannot support them: DSO, DPO, working capital, close
 
 | Check | Result | Source |
 |---|---|---|
-| Phase 6 browser suite | 297 PASS / 0 FAIL / 1 SKIP of 298 | Phase 6 report |
-| Phase 6 negative controls | 6 of 6 re-introduced defects detected | Phase 6 report |
-| Phase 7 dashboard module | 471 PASS / 0 FAIL / 3 NOT TESTED (+2 INFO) | Phase 7 report |
-| Engine and DOM values against the independent pandas reference | 17 filter and scenario states, within a cent | Phase 7 |
-| Dashboard row sets equal the independent Posted (58,340) and non-Posted (77,990) sets | Exact | Phase 7 |
-| No external network references; no console errors after load and interaction | Pass | Phase 6, Phase 7 |
+| Dashboard browser suite | 297 PASS / 0 FAIL / 1 SKIP of 298 | Dashboard report |
+| Dashboard negative controls | 6 of 6 re-introduced defects detected | Dashboard report |
+| Independent validation dashboard module | 471 PASS / 0 FAIL / 3 NOT TESTED (+2 INFO) | Independent validation report |
+| Engine and DOM values against the independent pandas reference | 17 filter and scenario states, within a cent | Independent validation |
+| Dashboard row sets equal the independent Posted (58,340) and non-Posted (77,990) sets | Exact | Independent validation |
+| No external network references; no console errors after load and interaction | Pass | Dashboard, independent validation |
 
-Selection consistency was tested in 17 specific states, **not every possible filter combination**. The in-page "Baseline checks" badge compares default values with embedded Phase 4 tables; the "Selection checks" badge compares two implementations inside the same page. Neither is an independent test; independence comes from the pandas reference in the test suites.
+Selection consistency was tested in 17 specific states, **not every possible filter combination**. The in-page "Baseline checks" badge compares default values with embedded SQL analysis tables; the "Selection checks" badge compares two implementations inside the same page. Neither is an independent test; independence comes from the pandas reference in the test suites.
 
 ## 12. What was not tested
 

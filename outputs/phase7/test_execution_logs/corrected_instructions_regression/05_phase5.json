@@ -1,9 +1,0 @@
-{
- "cmd": [
-  "python3",
-  "src/phase5_excel.py"
- ],
- "exit": 0,
- "seconds": 1.2,
- "max_rss_mb": 119.2
-}

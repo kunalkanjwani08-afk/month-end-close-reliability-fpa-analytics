@@ -1,7 +1,0 @@
-file,pattern,match
-tests/phase6_dashboard_qa.py,build_machine_path,/tmp/claude-0/bundled-skills/
-data/processed/QC_Report.txt,build_machine_path,/mnt/user-data/uploads/Downloads/fpa_monthly_close_raw_messy.csv
-data/processed/QC_Report.txt,build_machine_path,/tmp/claude-0/-home-claude/0e9b127f-3684-54d9-aef1-b8f704472daf/scratchpad/build
-data/processed/QC_Report.txt,build_machine_path,/tmp/claude-0/-home-claude/0e9b127f-3684-54d9-aef1-b8f704472daf/scratchpad/build
-data/processed/QC_Report.txt,build_machine_path,/tmp/claude-0/-home-claude/0e9b127f-3684-54d9-aef1-b8f704472daf/scratchpad/build
-data/processed/qc_summary.json,build_machine_path,/mnt/user-data/uploads/Downloads/fpa_monthly_close_raw_messy.csv

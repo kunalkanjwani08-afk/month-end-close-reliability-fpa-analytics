@@ -1,6 +1,6 @@
 # Financial Metrics and Accounting Rules
 
-Related: [DATA_DICTIONARY.md](DATA_DICTIONARY.md) (columns), [DATA_PROVENANCE.md](DATA_PROVENANCE.md) (origin), [TEST_PLAN.md](TEST_PLAN.md) (how each rule is tested; not repeated here).
+Related: [DATA_DICTIONARY.md](DATA_DICTIONARY.md) (columns), [DATA_PROVENANCE.md](DATA_PROVENANCE.md) (origin).
 
 **This document defines candidate metrics and the rules that must be validated before any financial result is published. It contains no financial results.** Counts of rows are shown as evidence for rules; no revenue, profit or variance totals are reported anywhere in the repository yet.
 
@@ -31,7 +31,7 @@ A rule being written here does not make it verified.
 | R14 | Every raw row gets exactly one primary exclusion reason or is eligible, using a fixed precedence. Secondary issues are separate flags. | Proposed—Needs Validation | Section 4. |
 | R11 | Duplicate rule for journal lines. | Unresolved | Section 11. |
 | R12 | Consolidation and intercompany elimination. | Unresolved | Section 12. |
-| R13 | Python, SQL and Excel reconcile on a fixed scope; differences are investigated, not forced. | Confirmed (principle) | Owner-stated; method in TEST_PLAN section 9. |
+| R13 | Python, SQL and Excel reconcile on a fixed scope; differences are investigated, not forced. | Confirmed (principle) | Owner-stated; checked by the test suite. |
 
 ## 2. Actual versus budget variance
 
@@ -61,7 +61,7 @@ A rule being written here does not make it verified.
 
 A row enters a reported total only if it passes every step below. To make the row accounting exact, each raw row gets **one primary exclusion reason**: the first step in the list that it fails. Rows that fail none are **eligible**. The order is fixed and deterministic, so the same row always gets the same reason.
 
-For each metric scope: `eligible + Σ rows per primary reason = 152,682`. This identity must hold exactly, and it is a test (TEST_PLAN section 11).
+For each metric scope: `eligible + Σ rows per primary reason = 152,682`. This identity must hold exactly, and it is a test in the test suite.
 
 | Order | Primary exclusion reason (row fails this step) | Status |
 |---|---|---|
@@ -176,7 +176,7 @@ About 5,761 rows are flagged intercompany (after normalising spellings), 24,494 
 - **Rule (Confirmed principle):** fix one scope in writing, compute it independently in each tool, and investigate every difference. Do not adjust one tool to match another.
 - **Candidate scope for the first reconciliation:** one entity, one period, P&L, eligible rows. Totals compared to the cent, with the row count compared first.
 - **Known sources of legitimate disagreement:** text-to-number parsing, rounding, treatment of empty strings versus nulls, case and whitespace in joins, and integer or float arithmetic.
-- **Method and tests:** [TEST_PLAN.md](TEST_PLAN.md) section 9.
+- **Method and tests:** the pytest suites in `tests/`.
 
 ## 14. Metrics the data supports, and those it does not
 

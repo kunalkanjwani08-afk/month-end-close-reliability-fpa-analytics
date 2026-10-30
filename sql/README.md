@@ -1,6 +1,6 @@
-# sql — Phase 4 DuckDB analysis
+# sql — SQL analysis DuckDB analysis
 
-Twelve numbered scripts in [`phase4/`](phase4/) define every population once and then build the analysis. They are executed in order by [`src/phase4_pipeline.py`](../src/phase4_pipeline.py) against an in-process DuckDB database built from the cleaned CSV.
+Twelve numbered scripts in [`analysis/`](analysis/) define every population once and then build the analysis. They are executed in order by [`src/sql_analysis_pipeline.py`](../src/sql_analysis_pipeline.py) against an in-process DuckDB database built from the cleaned CSV.
 
 | Script | Purpose |
 |---|---|
@@ -17,6 +17,6 @@ Twelve numbered scripts in [`phase4/`](phase4/) define every population once and
 | `11_dq_exposure_scenarios` | Status / scale / sign / duplicate scenarios, exclusion waterfall |
 | `99_analytical_validation` | Structural and analytical validation rows (fail-closed) |
 
-**Database setup.** There is nothing to install beyond `pip install -r requirements.txt` (the `duckdb` Python package). `python src/phase4_pipeline.py` creates `data/processed/phase4_fpa.duckdb`, runs the scripts, validates (55 + 24 + 86 + 124 rows) and writes 72 output tables to [`outputs/phase4/`](../outputs/phase4/). Exit code 0 means every validation passed. The database file itself is not published.
+**Database setup.** There is nothing to install beyond `pip install -r requirements.txt` (the `duckdb` Python package). `python src/sql_analysis_pipeline.py` creates `build/fpa_analysis.duckdb`, runs the scripts, validates (55 + 24 + 86 + 124 rows) and writes 72 output tables to [`build/sql_results/`](../build/sql_results/). Exit code 0 means every validation passed. The database file itself is not published.
 
 Account numbers and other dataset-specific values are read from the cleaned data, not hard-coded into the scripts.

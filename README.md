@@ -1,6 +1,6 @@
 # NovaBridge — Month-End Close Reliability & Financial Performance Analytics
 
-**An end-to-end FP&A analytics portfolio project:** a messy, 152,682-row month-end ledger extract for a fictional group is cleaned without deleting a row, analysed in SQL (DuckDB), reviewed in a formula-driven Excel workbook, explored in an interactive dashboard, and independently re-checked in a 780-check QA phase.
+**An end-to-end FP&A analytics portfolio project:** a messy, 152,682-row month-end ledger extract for a fictional group is cleaned without deleting a row, analysed in SQL (DuckDB), reviewed in a formula-driven Excel workbook, explored in an interactive dashboard, and independently re-checked against a pandas recalculation.
 
 > **Portfolio project on synthetic data.** NovaBridge Industries is fictional. The project owner states that the dataset is synthetic and was created for portfolio and learning purposes; that statement is **not independently verified** (no generator, seed or licence record exists). Nothing here describes the performance of a real company, and no figure should be read as one.
 >
@@ -8,23 +8,22 @@
 
 | | |
 |---|---|
-| **Data** | 152,682 posting lines × 43 text columns (raw) → 192-column cleaned file, 36 months (Jan 2023 – Dec 2025), 6 entities, 5 divisions |
-| **Code** | Python (cleaning, pipeline, Excel and dashboard builders), 12 SQL scripts, pytest suites (Phases 4–5), a dashboard browser-QA suite and the Phase 7 QA scripts |
-| **Deliverables** | Cleaned dataset · 72 SQL output tables · 12-sheet Excel workbook (3,819 formulas) · 9-tab standalone dashboard · QA evidence · 24 documents |
-| **Tested on 30 Oct 2026** | Fresh Python 3.13 environment on Linux: 125 pytest tests pass, 297 dashboard browser checks pass, 1 skipped (see [Testing](#testing)) |
+| **Data** | Raw extract: 152,682 posting lines × 43 text columns · cleaned dataset: same 152,682 rows, 36 months (Jan 2023 – Dec 2025), 6 entities, 5 divisions |
+| **Code** | Python (cleaning script, SQL pipeline, cross-check, Excel and dashboard builders), 12 SQL scripts, pytest suites, a dashboard browser-test script |
+| **Deliverables** | Cleaned dataset (Excel) · 12-sheet analysis workbook (3,819 formulas) · three reconciliation workbooks · 9-tab standalone dashboard · 11 documents |
 
 ---
 
 ## Contents
 
 1. [The finance problem](#the-finance-problem)
-2. [What the analysis shows (synthetic data)](#what-the-analysis-shows-synthetic-data)
-3. [The nine phases](#the-nine-phases)
+2. [What the analysis shows](#what-the-analysis-shows-synthetic-data)
+3. [How the project is organised](#how-the-project-is-organised)
 4. [Repository map](#repository-map)
-5. [Data: what is here, and how to use it](#data)
+5. [Data](#data)
 6. [Data cleaning and validation](#data-cleaning-and-validation)
 7. [SQL analysis](#sql-analysis)
-8. [Excel workbook and reconciliation](#excel-workbook-and-reconciliation)
+8. [Excel workbooks](#excel-workbooks)
 9. [Dashboard](#dashboard)
 10. [Testing](#testing)
 11. [Technologies](#technologies)
@@ -53,22 +52,22 @@ These are findings about the synthetic extract, shown to illustrate the method, 
 
 * Only **58,340 of 152,682 rows (38.2%)** qualify for the reported P&L under the project's provisional rules.
 * The journal-status rule alone moves reported revenue from **$202.65M** (Posted only) to **$471.58M** (all statuses). Stating the population and the rule beside every number is the point of the exercise.
-* Seven insights are registered with evidence in [`docs/PHASE4_INSIGHT_REGISTER.md`](docs/PHASE4_INSIGHT_REGISTER.md), covering budget variance, forecast error (WAPE and bias), prior-year comparison, three explicit gross-profit treatments, and cost concentration (Pareto, HHI).
+* Seven insights are registered with evidence in [`docs/INSIGHT_REGISTER.md`](docs/INSIGHT_REGISTER.md), covering budget variance, forecast error (WAPE and bias), prior-year comparison, three explicit gross-profit treatments, and cost concentration (Pareto, HHI).
 * Several things are deliberately **not** computed because the data cannot support them: no favourable/unfavourable labels, EBITDA, DSO, DPO, working capital, close-duration or forecast-skill metric.
 
-## The nine phases
+## How the project is organised
 
-| # | Phase | Main deliverables | Where |
+The work was done in seven steps, each building on the verified output of the one before:
+
+| Step | What was done | Main deliverables | Where |
 |---|---|---|---|
-| 1 | **Project design and data understanding** | Rules register (R1–R14), data dictionary, provenance record, test plan | [`docs/`](docs/) |
-| 2 | **Data acquisition and initial quality review** | Raw file identity gate (SHA-256, rows, columns); profile of all 43 columns; cleaned CSV and QC report | [`data/`](data/) |
-| 3 | **Python data cleaning and validation** | `clean_fpa_monthly_close.py`: row-preserving cleaner, per-row scale decisions, duplicate and sign flags, 43 in-memory + 27 read-back checks | [`src/`](src/) |
-| 4 | **SQL database and financial analysis** | 12 DuckDB scripts, pipeline, 72 output tables, 289 validation rows, analysis report, insight register | [`sql/`](sql/), [`outputs/phase4/`](outputs/phase4/) |
-| 5 | **Excel analysis and reconciliation** | 12-sheet workbook, 3,819 formulas, 137 live reconciliation checks, 7 charts | [`excel/`](excel/), [`outputs/phase5/`](outputs/phase5/) |
-| 6 | **Interactive dashboard** | Standalone HTML, nine tabs, filters, scenarios, cross-filtering, CSV export, print, light/dark | [`dashboard/`](dashboard/), [`outputs/phase6/`](outputs/phase6/) |
-| 7 | **End-to-end QA and independent validation** | An independent pandas reference rebuilt every figure and compared it with SQL, Excel and the dashboard: 780 checks, 18 issues logged (none critical or high) | [`outputs/phase7/`](outputs/phase7/) |
-| 8 | **Professional documentation** | 13 documents (executive summary, workflow, methodology, guides, risk register, catalog) | [`docs/`](docs/) |
-| 9 | **Publication** | Full project published; lossless data compression; this README; publication reports | [`reports/phase9/`](reports/phase9/) |
+| **1. Scoping and rules** | Wrote down the finance rules, metric definitions and data dictionary before touching the data | Rules register, data dictionary, provenance record | [`docs/`](docs/) |
+| **2. Data profiling and cleaning** | Checked the raw file's identity (SHA-256, rows, columns), profiled all 43 columns, and cleaned the data without deleting a row | `clean_fpa_monthly_close.py`, cleaned dataset, QC report | [`data/`](data/), [`src/`](src/) |
+| **3. SQL analysis** | Loaded the cleaned data into DuckDB and ran 12 SQL scripts for variance, forecast error, gross profit, cost structure and data-quality scenarios | SQL scripts, pipeline, 72 result tables, analysis report, insight register | [`sql/`](sql/), [`src/`](src/), [`docs/`](docs/) |
+| **4. Excel workbook** | Built a formula-driven workbook that ties back to the SQL results with live PASS/FAIL checks | 12-sheet workbook, 137 reconciliation checks, 7 charts | [`excel/`](excel/) |
+| **5. Dashboard** | Built a standalone interactive HTML dashboard from the validated results | Nine tabs, filters, scenarios, CSV export, print, light/dark theme | [`dashboard/`](dashboard/) |
+| **6. Independent validation** | Rebuilt every headline figure in pandas and compared it with SQL, Excel and the dashboard; logged the issues found | Reconciliation workbooks, issue log | [`excel/`](excel/) |
+| **7. Documentation** | Wrote the guides, methodology and risk register | 11 documents | [`docs/`](docs/) |
 
 ## Repository map
 
@@ -79,37 +78,29 @@ These are findings about the synthetic extract, shown to illustrate the method, 
 ├── requirements.txt             pinned dependencies (Python 3.11+)
 ├── data/
 │   ├── raw/                     original extract (gzip) + checksum README
-│   └── processed/               cleaned dataset (gzip), QC_Report.txt, qc_summary.json
-├── src/                         cleaner, SQL pipeline, cross-check, report, Excel and dashboard builders
-├── sql/phase4/                  12 numbered DuckDB scripts (+ sql/README.md)
-├── excel/                       guide to the workbooks (the files live in outputs/)
-├── dashboard/                   guide to the dashboard (the HTML lives in outputs/phase6/)
-├── tests/                       fixture, full-data, Excel, dashboard and Phase 7 QA scripts
-├── docs/                        24 documents (data dictionary, metrics, methodology, risks, ...)
-├── outputs/
-│   ├── phase4/                  72 analytical tables + MANIFEST.json
-│   ├── phase5/                  Excel workbook, manifest, QA report
-│   ├── phase6/                  dashboard HTML, QA report, screenshots
-│   └── phase7/                  QA report, reconciliation workbooks, logs, evidence
-├── reports/phase8/              documentation QA reports
-├── reports/phase9/              publication inventory, manifest, validation, exclusions
-└── .github/workflows/           (placeholder only; no CI exists)
+│   └── processed/               cleaned dataset (Excel), QC_Report.txt, qc_summary.json
+├── src/                         cleaning script, SQL pipeline, cross-check, report, Excel and dashboard builders
+├── sql/analysis/                12 numbered DuckDB scripts (+ sql/README.md)
+├── excel/                       analysis workbook + three reconciliation workbooks
+├── dashboard/                   standalone dashboard HTML + screenshots
+├── tests/                       pytest suites, dashboard browser tests
+└── docs/                        11 documents (data dictionary, metrics, methodology, guides, risks, ...)
 ```
 
-Paths such as `outputs/phaseN/` are kept because the generators, manifests and tests write to and verify them; moving files would break those checks.
+Generated files (`build/`: DuckDB database, SQL result tables, dashboard test output) are rebuilt by the scripts and are git-ignored.
 
 ## Data
 
-| File | Stored as | After decompression |
+| File | Stored as | Notes |
 |---|---|---|
-| [`data/raw/fpa_monthly_close_raw_messy.csv.gz`](data/raw/) | 11.2 MB | 51,938,535 bytes · SHA-256 `a0e6eddd…ff` |
-| [`data/processed/fpa_monthly_close_cleaned.csv.gz`](data/processed/) | 28.5 MB | 174,545,248 bytes · SHA-256 `c184b677…9b47` |
+| [`data/raw/fpa_monthly_close_raw_messy.csv.gz`](data/raw/) | 11.2 MB gzip | decompresses to 51,938,535 bytes · SHA-256 `a0e6eddd…ff` |
+| [`data/processed/fpa_monthly_close_cleaned.xlsx`](data/processed/) | 67.4 MB Excel | `Cleaned_Data` sheet: 152,682 rows × 77 columns, plus 20 documentation sheets |
 
-* Both are **lossless GZIP** copies. On 30 Oct 2026 each was decompressed and compared with its original: identical SHA-256 and identical line count (152,683 lines each, i.e. 152,682 rows plus a header). Full hashes are in [`data/raw/README.md`](data/raw/README.md) and [`data/processed/README.md`](data/processed/README.md).
-* The raw file is the **original, never-edited** extract. The cleaned file is a separate output of the cleaning script.
+* The raw gzip is **lossless**: on 30 Oct 2026 it was decompressed and compared with the original, with identical SHA-256 and line count (152,683 lines: 152,682 rows plus a header). Full hashes: [`data/raw/README.md`](data/raw/README.md).
+* The raw file is the **original, never-edited** extract. The cleaned workbook is a separate output of the cleaning script.
+* **The cleaned workbook shows 77 of the 192 columns the cleaning script produces.** The SQL analysis also needs the flag, raw-copy and scale-adjustment columns, which are in a 174.5 MB CSV (SHA-256 `c184b677…9b47`). That CSV is **not stored** here: running the cleaning script on the raw file regenerates it (step 0 in [`HOW_TO_RUN.txt`](HOW_TO_RUN.txt)). I did this on 30 Oct 2026 from the published raw file: the CSV hash matched exactly, and the regenerated workbook matched the published one in all 21 sheets (including all 152,682 `Cleaned_Data` rows) except the run timestamp and input path.
 * **What the synthetic data represents:** a month-end ledger for NovaBridge Industries, a fictional group. Each row is one posting line with actual, budget, forecast and prior-year amounts in separate USD columns; P&L and balance-sheet lines are mixed; `scenario_tag` is noise by design. See the [data dictionary](docs/DATA_DICTIONARY.md) and [provenance record](docs/DATA_PROVENANCE.md).
-* **Personal-data check (30 Oct 2026):** the data contains 8 person-like cost-centre owner names (initial + surname) and 8 generic system user IDs; no email address, phone number or URL appears in the columns checked. They are treated as fictional because the group is fictional; that is not proven.
-* The Phase 4 DuckDB file (86 MB) is not published; it is rebuilt in about 20 seconds by the pipeline.
+* **Personal-data check:** the data contains 8 person-like cost-centre owner names (initial + surname) and 8 generic system user IDs; no email address, phone number or URL appears in the columns checked. They are treated as fictional because the group is fictional; that is not proven.
 
 ## Data cleaning and validation
 
@@ -120,52 +111,47 @@ Paths such as `outputs/phaseN/` are kept because the generators, manifests and t
 3. **Scale restoration**: where `report_scale` is unreliable, a value is restored to full scale only when a direct identity test or a peer comparison supports it, and left *undetermined* otherwise.
 4. **Flags, not repairs**: duplicate candidates, FX anomalies and sign anomalies are flagged and retained.
 5. **One exclusion reason per row**: an ordered rule list assigns each row its first failed test (non-posting, test entity, balance-sheet line, journal status, unresolvable period, missing actual, undecidable scale) or marks it eligible.
-6. **Self-checks**: 43 in-memory and 27 read-back checks, plus a row-for-row preservation check.
+6. **Self-checks**: 43 in-memory and 23 read-back checks (all passed on 30 Oct 2026), plus a row-for-row preservation check.
 
 Methodology: [`docs/DATA_AND_CLEANING_METHODOLOGY.md`](docs/DATA_AND_CLEANING_METHODOLOGY.md) · rules register: [`docs/FINANCIAL_METRICS.md`](docs/FINANCIAL_METRICS.md).
 
 ## SQL analysis
 
-Twelve numbered scripts in [`sql/phase4/`](sql/phase4/) define each population once and build, in order: dimensions and views; grain and overview; load validation; **budget variance**; **forecast error (WAPE, bias)**; **prior-year comparison**; **gross profit** under three treatments of a contra-revenue account; **cost concentration** (Pareto, HHI); trend and volatility; balance sheet (kept apart from the P&L); **data-quality scenarios** (status, scale, sign, duplicates); and a structural validation script. [`src/phase4_pipeline.py`](src/phase4_pipeline.py) runs them and fails closed: on any failed validation nothing is promoted. An independent pandas cross-check recomputes 124 figures. Guide: [`sql/README.md`](sql/README.md), [`docs/SQL_ANALYTICS_GUIDE.md`](docs/SQL_ANALYTICS_GUIDE.md).
+Twelve numbered scripts in [`sql/analysis/`](sql/analysis/) define each population once and build, in order: dimensions and views; grain and overview; load validation; **budget variance**; **forecast error (WAPE, bias)**; **prior-year comparison**; **gross profit** under three treatments of a contra-revenue account; **cost concentration** (Pareto, HHI); trend and volatility; balance sheet (kept apart from the P&L); **data-quality scenarios** (status, scale, sign, duplicates); and a structural validation script. [`src/sql_analysis_pipeline.py`](src/sql_analysis_pipeline.py) runs them and fails closed: on any failed validation nothing is promoted. An independent pandas cross-check ([`src/independent_crosscheck.py`](src/independent_crosscheck.py)) recomputes 124 figures. Guides: [`sql/README.md`](sql/README.md), [`docs/SQL_ANALYTICS_GUIDE.md`](docs/SQL_ANALYTICS_GUIDE.md), full results narrative: [`docs/FINANCIAL_ANALYSIS_REPORT.md`](docs/FINANCIAL_ANALYSIS_REPORT.md).
 
-## Excel workbook and reconciliation
+## Excel workbooks
 
-[`outputs/phase5/fpa_month_end_close_analysis.xlsx`](outputs/phase5/fpa_month_end_close_analysis.xlsx) has 12 sheets (Start Here, Executive Summary, Monthly P&L, Budget vs Actual, Forecast & Prior Year, Entity & Division, GL & Cost Drivers, Gross Profit, Insights & Actions, Data Quality, Reconciliation & QA, Definitions), 3,819 formulas and 7 charts. Its **Reconciliation & QA** sheet holds 137 live PASS/FAIL formulas that tie the workbook back to the SQL outputs. Three further Phase 7 workbooks hold the independent lineage and financial reconciliation and the issue log. Guide: [`excel/README.md`](excel/README.md), [`docs/EXCEL_FINANCIAL_ANALYSIS_GUIDE.md`](docs/EXCEL_FINANCIAL_ANALYSIS_GUIDE.md).
+[`excel/fpa_month_end_close_analysis.xlsx`](excel/fpa_month_end_close_analysis.xlsx) has 12 sheets (Start Here, Executive Summary, Monthly P&L, Budget vs Actual, Forecast & Prior Year, Entity & Division, GL & Cost Drivers, Gross Profit, Insights & Actions, Data Quality, Reconciliation & QA, Definitions), 3,819 formulas and 7 charts. Its **Reconciliation & QA** sheet holds 137 live PASS/FAIL formulas that tie the workbook back to the SQL results. It has no pivot tables.
+
+Three further workbooks come from the independent validation: [`financial_reconciliation.xlsx`](excel/financial_reconciliation.xlsx), [`data_lineage_reconciliation.xlsx`](excel/data_lineage_reconciliation.xlsx) and [`issue_log.xlsx`](excel/issue_log.xlsx). Guide: [`excel/README.md`](excel/README.md), [`docs/EXCEL_FINANCIAL_ANALYSIS_GUIDE.md`](docs/EXCEL_FINANCIAL_ANALYSIS_GUIDE.md).
 
 ## Dashboard
 
-[`outputs/phase6/fpa_financial_analytics_dashboard.html`](outputs/phase6/fpa_financial_analytics_dashboard.html) is a **standalone 7.3 MB HTML file** (no server, no network, no third-party library) with nine tabs, global filters, journal-status / scale / sign / duplicate scenario selectors, chart cross-filtering, CSV export, print layout and light/dark themes. It embeds 136,330 line-level records.
+[`dashboard/fpa_financial_analytics_dashboard.html`](dashboard/fpa_financial_analytics_dashboard.html) is a **standalone 7.3 MB HTML file** (no server, no network, no third-party library) with nine tabs, global filters, journal-status / scale / sign / duplicate scenario selectors, chart cross-filtering, CSV export, print layout and light/dark themes. It embeds 136,330 line-level records.
 
-**To use it: download the file and open it in a browser.** GitHub displays it as source code and does **not** run it; there is no hosted live demo. User guide: [`docs/DASHBOARD_USER_GUIDE.md`](docs/DASHBOARD_USER_GUIDE.md) · screenshots: [`outputs/phase6/qa_screens/`](outputs/phase6/qa_screens/).
+**To use it: download the file and open it in a browser.** GitHub displays it as source code and does **not** run it; there is no hosted live demo. User guide: [`docs/DASHBOARD_USER_GUIDE.md`](docs/DASHBOARD_USER_GUIDE.md) · screenshots: [`dashboard/screenshots/`](dashboard/screenshots/).
+
+![Dashboard overview](dashboard/screenshots/desktop_overview.png)
 
 ## Testing
 
-Distinguishing what was **run now** from what is **historical**:
-
-**Re-run on 30 Oct 2026 for this publication** (Linux, Python 3.13.16, fresh virtual environment from `requirements.txt`; full evidence in [`reports/phase9/`](reports/phase9/)):
+Run on **30 Oct 2026** (Linux, Python 3.13.16, pandas 3.0.5, NumPy 2.5.3, DuckDB 2.0.0) after the final renaming and rebuild:
 
 | Check | Result |
 |---|---|
-| `pip install -r requirements.txt` and `pip check` | clean, no conflicts |
-| Python syntax (`compileall` of `src`, `tests`) | 0 errors |
-| Phase 4 fixture tests | 42 passed |
-| SQL: pipeline executes all 12 scripts on the real data and validates | exit 0; 72 tables rebuilt, **byte-identical** to the published `outputs/phase4/` |
-| Phase 4 full-data tests | 74 passed (includes the 42 fixture tests) |
-| Excel: workbook rebuild and Phase 5 tests | 3,819 formulas, 137/137 reconciliation checks, 51 tests passed |
-| Excel: independent recalculation in headless LibreOffice | 137 PASS, 0 FAIL, 0 Excel error values |
-| Dashboard: headless Chromium browser QA suite | 297 PASS, 0 FAIL, 1 SKIP (the screen-reader test, impossible here); covers filters, scenarios, themes, responsive widths, console errors |
-| Lossless data compression | identical SHA-256 and line count after round trip |
-| Secret, personal-data, path and prohibited-file scans; link check | see [`reports/phase9/PHASE9_VALIDATION_REPORT.md`](reports/phase9/PHASE9_VALIDATION_REPORT.md) |
+| Cleaning script re-run on the published raw file (with `--no-excel-readback`) | 43 in-memory + 23 read-back checks, 0 failed; cleaned CSV SHA-256 identical to the reference |
+| SQL analysis pipeline on the real data | exit 0; 72 result tables rebuilt, identical to the previous build except for a few wording changes in check labels |
+| pytest (SQL pipeline and Excel workbook suites, with the cleaned CSV) | **125 passed, 0 failed, 0 skipped** |
+| Excel workbook rebuild | 3,819 formulas, 137/137 reconciliation checks pass |
+| Dashboard: headless Chromium browser test script **297 passed, 0 failed**, 1 skipped (screen-reader test, impossible here); covers filters, scenarios, themes, responsive widths, console errors. Run on the dashboard build just before the last rebuild, which changed only 3 bytes of embedded metadata |
 
-In total, **125 pytest tests** (74 Phase 4 + 51 Phase 5; the 42 fixture tests are part of the 74) and **297 browser checks** (1 further check skipped, see above) were run now.
+**Historical (not re-run as a whole):** an independent pandas reference compared with SQL, Excel and the dashboard: **780 checks executed: 774 PASS, 1 FAIL, 1 BLOCKED, 4 NOT TESTED, plus 43 INFO**. The single FAIL was a defect in the original run instructions (corrected and regression-tested), not in the data or calculations. Issues found are in [`excel/issue_log.xlsx`](excel/issue_log.xlsx). The one-off validation scripts are not part of this repository.
 
-**Historical (Phase 7, not re-run as a whole):** an independent pandas reference compared with SQL, Excel and the dashboard: **780 checks executed: 774 PASS, 1 FAIL, 1 BLOCKED, 4 NOT TESTED, plus 43 INFO**. The single FAIL was a defect in the original run instructions (corrected and regression-tested), not in the data or calculations. See [`docs/QA_AND_VALIDATION_SUMMARY.md`](docs/QA_AND_VALIDATION_SUMMARY.md). The pipeline reproduced the cleaned CSV byte for byte in Phase 7; the cleaner was **not** re-run in this publication step.
-
-**Not tested:** Windows, other Python versions, native Microsoft Excel, Firefox, Safari, screen readers, a physical printer.
+**Not tested:** Windows, other Python versions, native Microsoft Excel, Firefox, Safari, screen readers, a physical printer. Tests need the cleaned CSV, which must be regenerated first (see [Run it yourself](#run-it-yourself)).
 
 ## Technologies
 
-Python 3.11+ (pandas 3.0.5, NumPy 2.4.6, OpenPyXL 3.1.5, XlsxWriter 3.2.9) · DuckDB 2.0.0 and SQL · pytest 9.2.0 · HTML/CSS/JavaScript (hand-written dashboard; no framework) · QA only: Playwright 1.56 with Chromium, LibreOffice (headless). Power BI is **not** used in this project.
+Python 3.11+ (pandas, NumPy, OpenPyXL, XlsxWriter) · DuckDB and SQL · pytest · HTML/CSS/JavaScript (hand-written dashboard; no framework) · QA only: Playwright with Chromium, LibreOffice (headless). Exact versions are in [`requirements.txt`](requirements.txt). Power BI is **not** used in this project.
 
 ## Run it yourself
 
@@ -174,33 +160,31 @@ git clone https://github.com/kunalkanjwani08-afk/month-end-close-reliability-fpa
 cd month-end-close-reliability-fpa-analytics
 python -m venv .venv && source .venv/bin/activate        # Windows: .venv\Scripts\activate
 pip install -r requirements.txt
-gunzip -k data/raw/*.csv.gz data/processed/*.csv.gz      # or the Python one-liner in HOW_TO_RUN.txt
-python src/phase4_pipeline.py                            # ~20 s; exit 0 = every validation passed
-python -m pytest tests -q --ignore=tests/test_phase5_excel.py
-python src/phase5_excel.py && python -m pytest tests/test_phase5_excel.py -q
-python src/phase6_dashboard.py                           # rebuild the dashboard HTML
+gunzip -k data/raw/fpa_monthly_close_raw_messy.csv.gz      # or the Python one-liner in HOW_TO_RUN.txt
+python src/clean_fpa_monthly_close.py --output-dir data/processed   # ~4-5 min; regenerates the 192-column cleaned CSV
+python src/sql_analysis_pipeline.py                        # ~20 s; exit 0 = every validation passed
+python -m pytest tests -q --ignore=tests/test_excel_workbook.py
+python src/excel_workbook_builder.py && python -m pytest tests/test_excel_workbook.py -q
+python src/dashboard_builder.py                            # rebuild the dashboard HTML
 ```
 
-`HOW_TO_RUN.txt` has the full sequence, the Windows commands and the known pitfalls (for example, the cleaner must be given `--output-dir data/processed`). Quick look without running anything: open the dashboard HTML or the Excel workbook directly.
+`HOW_TO_RUN.txt` has the full sequence, the Windows commands and the known pitfalls. To look without running anything, open the dashboard HTML or the Excel workbooks directly.
 
 ## Assumptions, limitations and open issues
 
 * **Provenance:** synthetic status and the dataset's origin are owner-stated, not verified; no licence for the data exists.
 * **Every headline figure is conditional** on provisional rules: the Posted-only journal-status rule, per-row scale restoration, FX direction, the variance-% convention and per-line summing of budget, forecast and prior-year amounts. The account **sign convention**, **duplicate handling** and **consolidation** remain unresolved.
-* **4,996 non-Posted lines appear in no dashboard view** (they fail the amount or scale gates); they are counted in the Phase 4 exclusion waterfall and the workbook's Data Quality sheet.
+* **4,996 non-Posted lines appear in no dashboard view** (they fail the amount or scale gates); they are counted in the exclusion waterfall and the workbook's Data Quality sheet.
 * The account-to-section mapping has not been checked against an authoritative chart of accounts.
-* **Sandbox build paths** (for example `/tmp/...`, no personal paths) remain in `QC_Report.txt`, `qc_summary.json` and Phase 7 logs; they are published unchanged because other files record their hashes.
-* The Phase 7 scripts in `tests/phase7/` document the QA method; one reads logs from the original build session and is not portable as it stands.
+* **Sandbox build paths** (for example `/tmp/...`, no personal paths) remain in `QC_Report.txt` and `qc_summary.json`.
+* The reconciliation workbooks in `excel/` are results of one-off validation scripts that are not included, so they cannot be regenerated from this repository.
 * The full register, with the evidence that would resolve each item, is in [`docs/ASSUMPTIONS_LIMITATIONS_AND_RISKS.md`](docs/ASSUMPTIONS_LIMITATIONS_AND_RISKS.md).
-
-Older documents keep their original wording as the historical record; where they call the release "blocked" or "draft" they describe Phase 8 and are superseded by [`docs/PUBLICATION_DECISION.md`](docs/PUBLICATION_DECISION.md).
 
 ## How this was built (AI assistance)
 
-I (Kunal Kanjwani) set the scope, the finance rules, the analytical requirements, the review of every phase and the acceptance decisions, and I required that failures and untested areas be reported. **Claude (an AI assistant made by Anthropic) wrote most of the code and drafted most of the documentation under my direction**; I did not hand-write every line. Deliverables were also cross-reviewed with a second AI tool, and only corrections that held up against the project files were applied. Treat this as an AI-assisted project directed by a finance student, not as a demonstration of unaided coding.
+I (Kunal Kanjwani) set the scope, the finance rules, the analytical requirements, the review of every step and the acceptance decisions, and I required that failures and untested areas be reported. **Claude (an AI assistant made by Anthropic) wrote most of the code and drafted most of the documentation under my direction**; I did not hand-write every line. Deliverables were also cross-reviewed with a second AI tool, and only corrections that held up against the project files were applied. Treat this as an AI-assisted project directed by a finance student, not as a demonstration of unaided coding.
 
 ## Licence and repository notes
 
 * **No licence is granted.** No MIT, Apache, GPL or other open-source licence applies; default copyright is retained. Viewing and forking on GitHub is allowed by GitHub's Terms of Service, which does not grant wider redistribution rights.
-* The raw CSV was committed uncompressed in the first commit of this repository (Stage 0). The history was **not** rewritten, so that earlier ~52 MB copy remains in git history; the current tree stores only the compressed copy.
-* Phase 9 reports, including the superseded restricted-release plan, are in [`reports/phase9/`](reports/phase9/).
+* Earlier commits contain files that are no longer in the current tree: an uncompressed ~52 MB copy of the raw CSV and a gzip copy of the cleaned CSV. Git history was **not** rewritten, so they remain in history only.

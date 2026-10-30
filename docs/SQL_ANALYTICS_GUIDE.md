@@ -2,19 +2,18 @@
 
 **Month-End Close Reliability & Financial Performance Analytics**
 
-> **Status (updated at Phase 9 publication, 30 Oct 2026):** published as part of the complete project. The owner decided to publish the whole project, including the dataset he describes as synthetic. Dataset provenance and redistribution rights remain **owner-stated and not independently verified**. Any wording below from Phase 8 that calls the release *blocked*, *draft* or *not approved* describes the Phase 8 state and is superseded by [PUBLICATION_DECISION.md](PUBLICATION_DECISION.md). No calculation, figure or finding was changed.
 > **Data:** fictional NovaBridge Industries; owner-described as synthetic. Figures describe a simulated extract.
 > **Evidence labels:** Verified / Owner-stated / Assumption / Unresolved.
 
-Related: [Project overview](PROJECT_OVERVIEW.md) · [Data and cleaning](DATA_AND_CLEANING_METHODOLOGY.md) · [Financial metrics](FINANCIAL_METRICS_AND_METHODOLOGY.md) · [QA summary](QA_AND_VALIDATION_SUMMARY.md)
+Related: [Data and cleaning](DATA_AND_CLEANING_METHODOLOGY.md) · [Financial metrics](FINANCIAL_METRICS.md)
 
 ---
 
 ## 1. Purpose
 
-The SQL layer turns the cleaned CSV into a typed database, defines the reportable populations once (as views), and produces 72 result tables that feed the workbook, the dashboard and the analysis report. SQL outputs and views provide the **baseline** analytical results. The interactive dashboard computes dynamic filter selections in JavaScript from its embedded line-level payload and documented calculation logic, so a number shown for an arbitrary filter combination is not a stored SQL table row. Phase 7 independently compared the dashboard with pandas references in the tested filter and scenario states only (17 states); **not every possible filter combination has been independently tested**.
+The SQL layer turns the cleaned CSV into a typed database, defines the reportable populations once (as views), and produces 72 result tables that feed the workbook, the dashboard and the analysis report. SQL outputs and views provide the **baseline** analytical results. The interactive dashboard computes dynamic filter selections in JavaScript from its embedded line-level payload and documented calculation logic, so a number shown for an arbitrary filter combination is not a stored SQL table row. independent validation independently compared the dashboard with pandas references in the tested filter and scenario states only (17 states); **not every possible filter combination has been independently tested**.
 
-Scripts live in [`sql/phase4/`](../sql/phase4/) and are run by [`src/phase4_pipeline.py`](../src/phase4_pipeline.py) against DuckDB. Outputs are written to [`outputs/phase4/`](../outputs/phase4/) as CSV with a [`MANIFEST.json`](../outputs/phase4/MANIFEST.json). The cross-check script is [`src/phase4_crosscheck.py`](../src/phase4_crosscheck.py).
+Scripts live in [`sql/analysis/`](../sql/analysis/) and are run by [`src/sql_analysis_pipeline.py`](../src/sql_analysis_pipeline.py) against DuckDB. Outputs are written to [`build/sql_results/`](../build/sql_results/) as CSV with a [`MANIFEST.json`](../build/sql_results/MANIFEST.json). The cross-check script is [`src/independent_crosscheck.py`](../src/independent_crosscheck.py).
 
 ## 2. Database structure
 
@@ -26,7 +25,7 @@ Scripts live in [`sql/phase4/`](../sql/phase4/) and are run by [`src/phase4_pipe
 | 12 views | views | The reportable populations and scenario row sets (section 4) |
 | 72 `out_*` tables | tables | One result table per output CSV (section 5) |
 
-The database file is `data/processed/phase4_fpa.duckdb`. It is a generated local file, not tracked by git, so it is rebuilt by running the pipeline rather than shipped.
+The database file is `build/fpa_analysis.duckdb`. It is a generated local file, not tracked by git, so it is rebuilt by running the pipeline rather than shipped.
 
 **Grain.** One row of `fact_close` is one source extract record. The dataset contains 152,682 source extract records, including 350 non-posting subtotal/check records. These 350 records are not treated as ordinary posted journal lines. Actual, budget, forecast and prior-year amounts are four attributes of that line. A line can be missing any of them, which is why the populations differ in size.
 
@@ -53,7 +52,7 @@ The count is 72 = 9 (`a`) + 11 (`b`) + 8 (`c`) + 5 (`d`) + 6 (`e`) + 7 (`f`) + 6
 
 ## 4. Views and populations
 
-Populations are defined once in `01_dimensions_and_views` so that every query uses the same rows. Row counts are from the database as built in Phase 4 and re-queried in Phase 8 (read-only).
+Populations are defined once in `01_dimensions_and_views` so that every query uses the same rows. Row counts are from the database as built in SQL analysis and re-queried in documentation (read-only).
 
 | View | Rows | Rule |
 |---|---:|---|
@@ -67,7 +66,7 @@ Populations are defined once in `01_dimensions_and_views` so that every query us
 
 The remaining views (`v_var_scn`, `v_fc_scn`, `v_py_scn`, `v_gp_rows`, `v_dq_base`) expand the base populations into scenario row sets. The gap between `v_pl_actual_any_status` (136,330) and the union of the dashboard populations is explained in [DASHBOARD_USER_GUIDE.md](DASHBOARD_USER_GUIDE.md) and in risk 12 of [ASSUMPTIONS_LIMITATIONS_AND_RISKS.md](ASSUMPTIONS_LIMITATIONS_AND_RISKS.md).
 
-**Why views.** A population defined in one place cannot drift between queries. The Phase 7 audit re-derived the populations independently in pandas and matched them.
+**Why views.** A population defined in one place cannot drift between queries. The independent validation audit re-derived the populations independently in pandas and matched them.
 
 ## 5. Reusable macros and helper tables
 
@@ -198,13 +197,13 @@ Verified: revenue is $202.65M (Posted only), $404.38M (excluding Rejected) and $
 
 ### Validation (`val_*`)
 
-`val_load`, `val_exclusion_counts`, `val_analytical` and `val_crosscheck` compare the database against the cleaning QC and against an independent recomputation. They are the SQL layer's own checks and are separate from the Phase 7 audit.
+`val_load`, `val_exclusion_counts`, `val_analytical` and `val_crosscheck` compare the database against the cleaning QC and against an independent recomputation. They are the SQL layer's own checks and are separate from the independent validation audit.
 
 ## 7. Joins and aggregation rules
 
 - The fact table joins to `dim_account` on `gl_account` with a LEFT JOIN, so a missing account never drops a row silently.
 - Period spines (`CROSS JOIN` of entities and periods, then `LEFT JOIN`) are used where a zero month must appear as a zero rather than a missing row.
-- Self-joins on the prior year (`period_year − 1`) and half-year are used for growth; the Phase 7 SQL module checked join fan-out.
+- Self-joins on the prior year (`period_year − 1`) and half-year are used for growth; the independent validation SQL module checked join fan-out.
 - Aggregation sums amounts first, then divides. Percentages with a near-zero denominator are NULL (see `safe_pct`).
 - No query adds balance-sheet rows to P&L totals.
 
@@ -212,17 +211,17 @@ Verified: revenue is $202.65M (Posted only), $404.38M (excluding Rejected) and $
 
 | Check | Result | Source |
 |---|---|---|
-| Database counts and totals against cleaning QC | Agreed | `val_load`, Phase 7 |
-| Exclusion counts by gate | Agreed | `val_exclusion_counts`, Phase 7 |
-| 72 output tables against their CSV files | 72 present with manifest | Phase 7 file audit |
-| Key totals against an independent pandas reference | Agreed within tolerance | Phase 7 `F_I1` |
-| Python cross-check of the SQL results | Passed | `phase4_crosscheck.py` |
+| Database counts and totals against cleaning QC | Agreed | `val_load`, independent validation |
+| Exclusion counts by gate | Agreed | `val_exclusion_counts`, independent validation |
+| 72 output tables against their CSV files | 72 present with manifest | Independent validation file audit |
+| Key totals against an independent pandas reference | Agreed within tolerance | Independent validation `F_I1` |
+| Python cross-check of the SQL results | Passed | `independent_crosscheck.py` |
 
-Details and the one historical failure are in [QA_AND_VALIDATION_SUMMARY.md](QA_AND_VALIDATION_SUMMARY.md).
+Details and the one historical failure are in QA_AND_VALIDATION_SUMMARY.md.
 
 ## 9. Running the SQL layer
 
-The runnable sequence is in [HOW_TO_RUN.txt](../HOW_TO_RUN.txt). In short, the pipeline script loads the cleaned CSV, executes the scripts in order, exports the CSVs and writes the manifest. It was re-run in Phase 7 on Linux and reproduced the outputs. It has not been run on Windows or on a clean machine.
+The runnable sequence is in [HOW_TO_RUN.txt](../HOW_TO_RUN.txt). In short, the pipeline script loads the cleaned CSV, executes the scripts in order, exports the CSVs and writes the manifest. It was re-run in independent validation on Linux and reproduced the outputs. It has not been run on Windows or on a clean machine.
 
 ## 10. Limitations
 

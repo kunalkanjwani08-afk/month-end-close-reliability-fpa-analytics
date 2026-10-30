@@ -843,7 +843,7 @@ def step_nonposting(ctx: Ctx) -> None:
     ctx.log_rule("R3", "notes", notes_np.sum(),
                  "Identify NON-POSTING rows (notes = 'subtotal row'): TOTAL / Subtotal / CHECK rows. "
                  "Kept in the data, excluded from every total (exclusion step 1)",
-                 "Confirmed (identification per Phase-1 doc R3)", "Applied (flag + exclusion)")
+                 "Confirmed (identification per project scoping doc R3)", "Applied (flag + exclusion)")
 
 
 def step_entities(ctx: Ctx) -> None:
@@ -1445,7 +1445,7 @@ def step_scale(ctx: Ctx) -> None:
                  "Labels '000s' and 'In thousands' were NEVER divided in the tested rows, so they are NOT multiplied. "
                  "Rows decided as divided are multiplied by 1,000 / 100,000; as-reported values are kept in *_parsed",
                  "Evidence-based: HIGH = price-identity consistency test (list prices inferred from this dataset, not an independent source); "
-                 "MEDIUM = peer z-score. Neither is a proven truth - rule status per Phase-1 doc: Unresolved",
+                 "MEDIUM = peer z-score. Neither is a proven truth - rule status per project scoping doc: Unresolved",
                  "Applied (switch APPLY_SCALE_RESTORATION)",
                  cells_processed=len(ALL_AMT_SHORT) * ctx.n, cells_changed=_s1_cells)
     ctx.log_rule("S02", "report_scale", int(ctx.arr["scale_undetermined"].sum()),
@@ -1978,7 +1978,7 @@ def assign_exclusions(ctx: Ctx) -> None:
                  "Every row receives exactly one primary exclusion reason (or ELIGIBLE) per scope, first failing step of the "
                  "fixed precedence (non-posting, junk entity, entity unresolvable, wrong statement, status not eligible, period, "
                  "amount missing, scale undecidable, duplicate-removed). Secondary issues stay as flags",
-                 "Proposed - Needs Validation (Phase-1 doc R14)", "Applied (flags only; no row deleted)")
+                 "Proposed - Needs Validation (Project scoping doc R14)", "Applied (flags only; no row deleted)")
 
 
 def clean_dataset(raw: pd.DataFrame) -> Ctx:
@@ -2376,7 +2376,7 @@ def build_open_items(ctx: Ctx, findings: pd.DataFrame) -> pd.DataFrame:
     n_hi = int((ctx.arr["scale_restored"] & (D["scale_confidence"].to_numpy() == "HIGH")).sum())
     n_me = int((ctx.arr["scale_restored"] & (D["scale_confidence"].to_numpy() == "MEDIUM")).sum())
     items = [
-        ("Scale rule (R7)", "Unresolved in Phase 1; this run applies an evidence-based per-row decision.",
+        ("Scale rule (R7)", "Unresolved in project scoping; this run applies an evidence-based per-row decision.",
          f"{int(ctx.arr['scale_restored'].sum()):,} rows restored = {n_hi:,} HIGH-confidence (price-identity consistency test) + {n_me:,} MEDIUM-confidence (peer z-score). "
          "These are evidence-based restorations, NOT confirmed errors: the list prices behind the identity were inferred from this dataset, not taken from an independent source. "
          f"Labels '000s' and 'In thousands' were never divided "
@@ -2405,7 +2405,7 @@ def build_open_items(ctx: Ctx, findings: pd.DataFrame) -> pd.DataFrame:
          "Owner to define the sign convention per account group."),
         ("Entities", "Junk / unresolved entity rows are excluded, not deleted.",
          f"Junk by name {F['junk_by_name_n']}, by code {F['junk_by_code_n']}, union {F['junk_total_n']}; {int(ctx.arr['entity_unresolved'].sum())} rows have neither a code nor a name. "
-         "Phase-1 docs quote 173 (names only) - docs should be updated.", "Owner to confirm 'Do not use' / 'xxx' are non-reporting."),
+         "Project scoping docs quote 173 (names only) - docs should be updated.", "Owner to confirm 'Do not use' / 'xxx' are non-reporting."),
         ("Missing with no source", "Left blank on purpose.",
          f"posting_date blank {int(ctx.arr['pd_blank'].sum()):,}; cost centre blank {int(ctx.arr['cc_missing'].sum()):,}; user_id/approval blank ~4-5% each.",
          "Nothing to fix in cleaning; request a better extract if these matter."),

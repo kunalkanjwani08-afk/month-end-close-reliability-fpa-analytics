@@ -1,55 +1,61 @@
-PHASE 4 / PHASE 5 - HOW TO RUN (Windows / VS Code terminal; Linux/macOS commands in brackets)
+HOW TO RUN THE NOVABRIDGE PROJECT  (Windows / VS Code terminal; Linux/macOS commands in brackets)
 
-THIS REPOSITORY IS THE COMPLETE PROJECT (Phases 1-9), so the Phase 5 package caveat in earlier versions of this file no longer applies:
-   every source file, SQL script, test and output named below is in this repository.
-   Large data files are stored GZIP-compressed (lossless) and must be decompressed once; see step 0.
+Everything named below is in this repository. Large data files are stored compressed or are regenerated, see step 0.
 
-0. Data (decompress once; the .gz files are lossless, byte-identical after decompression):
-     Windows PowerShell (needs only Python):
-       python -c "import gzip,shutil;[shutil.copyfileobj(gzip.open(s,'rb'),open(s[:-3],'wb')) for s in ('data/raw/fpa_monthly_close_raw_messy.csv.gz','data/processed/fpa_monthly_close_cleaned.csv.gz')]"
-     Linux / macOS / Git Bash:  gunzip -k data/raw/*.csv.gz data/processed/*.csv.gz
-   Result (the decompressed *.csv files are git-ignored so they cannot be committed by accident):
-     data\raw\fpa_monthly_close_raw_messy.csv                (raw, never edited; SHA-256 a0e6eddde25280aa27a60c5955743d3243b14138d876eedac0547e24a1cc6fff)
-     data\processed\fpa_monthly_close_cleaned.csv             (canonical cleaned file, 174 MB; SHA-256 c184b677bacc6f23086e3b5eedd71836643cb75064e428a1ebfee4c075fa9b47)
-   Verify:  python -c "import hashlib,sys;print(hashlib.sha256(open(sys.argv[1],'rb').read()).hexdigest())" <file>
-   Optional: regenerate the cleaned file yourself instead of decompressing it:
-     python src\clean_fpa_monthly_close.py --output-dir data\processed
-   (Phase 7 correction: without --output-dir the script writes to <your Downloads>\fpa_monthly_close_cleaned\,
-    which the pipeline does not read. It takes about 4-5 minutes and also writes the review workbook and QC files.)
-   The pipeline checks the cleaned file's SHA-256 (above) and refuses to run on any other file.
+0. DATA
+   a) Raw data - decompress once (lossless; the result is byte-identical to the original extract):
+        Windows (needs only Python):
+          python -c "import gzip,shutil;shutil.copyfileobj(gzip.open('data/raw/fpa_monthly_close_raw_messy.csv.gz','rb'),open('data/raw/fpa_monthly_close_raw_messy.csv','wb'))"
+        Linux / macOS / Git Bash:   gunzip -k data/raw/fpa_monthly_close_raw_messy.csv.gz
+      Expected SHA-256 of the decompressed file:
+        a0e6eddde25280aa27a60c5955743d3243b14138d876eedac0547e24a1cc6fff
+      Check it:  python -c "import hashlib,sys;print(hashlib.sha256(open(sys.argv[1],'rb').read()).hexdigest())" data/raw/fpa_monthly_close_raw_messy.csv
 
-1. Environment (Python 3.11 or newer):
+   b) Cleaned data - the repository publishes the cleaned dataset as an Excel workbook:
+        data/processed/fpa_monthly_close_cleaned.xlsx      (Cleaned_Data sheet: 152,682 rows x 77 columns, plus audit sheets)
+      The SQL analysis needs the full 192-column CSV version of the same cleaned data (eligibility flags, scale adjustments).
+      The CSV is not stored in the repository; regenerate it from the raw file with the cleaning script (about 4-5 minutes):
+          python src/clean_fpa_monthly_close.py --output-dir data/processed
+      Its SHA-256 must be:
+        c184b677bacc6f23086e3b5eedd71836643cb75064e428a1ebfee4c075fa9b47
+      (The same run rewrites the cleaned workbook, QC_Report.txt and qc_summary.json. The cleaned workbook content is identical;
+       only its generation timestamp and input path change.)
+      Without --output-dir the script writes to <your Downloads>\fpa_monthly_close_cleaned\, which the pipeline does not read.
+
+1. ENVIRONMENT (Python 3.11 or newer)
      python -m venv .venv
      .venv\Scripts\activate            [source .venv/bin/activate]
      pip install -r requirements.txt
 
-2. Build, validate and export (about 20-30 seconds):
-     python src\phase4_pipeline.py
-   Exit code 0 = all 55+24+86+124 checks passed and outputs\phase4\*.csv + MANIFEST.json were promoted.
+2. SQL ANALYSIS - build, validate and export (about 20-30 seconds)
+     python src\sql_analysis_pipeline.py
+   Exit code 0 = all 55+24+86+124 checks passed. Results: build\sql_results\*.csv + MANIFEST.json, database build\fpa_analysis.duckdb
+   (both git-ignored; they are rebuilt on demand).
    Exit code 1 = missing/invalid input.  Exit code 2 = integrity/validation failure.
-   On failure nothing accepted is overwritten; look in outputs\phase4_failed_run\ and data\processed\phase4_fpa.duckdb.failed.
+   On failure nothing accepted is overwritten; diagnostics go to build\sql_results_failed_run\ and build\fpa_analysis.duckdb.failed.
 
-3. Regenerate the two documents from the validated database:
-     python src\phase4_report.py
+3. ANALYSIS DOCUMENTS - regenerate from the validated database
+     python src\analysis_report_builder.py
+   Writes docs\FINANCIAL_ANALYSIS_REPORT.md and docs\INSIGHT_REGISTER.md.
 
-4. Tests (about 80 seconds with the cleaned CSV, 2 seconds without):
-     python -m pytest tests -q
-   Without the cleaned CSV only 42 fixture tests run and the run is reported INCOMPLETE (non-zero exit).
-   Phase 7 correction: if step 2 rebuilt the database, run this step as
-     python -m pytest tests -q --ignore=tests\test_phase5_excel.py
-   and run the Phase 5 tests in step 5. The DuckDB file is not byte-identical between rebuilds (its content is), and
-   two Phase 5 tests compare the database SHA-256 recorded in the workbook, so they fail until step 5 regenerates it.
+4. TESTS (about 80 seconds with the cleaned CSV, 2 seconds without)
+     python -m pytest tests -q --ignore=tests\test_excel_workbook.py
+   Without the cleaned CSV only the fixture tests run and the run is reported INCOMPLETE (non-zero exit).
+   The Excel tests are run in step 5 because they compare the database hash recorded in the workbook; the DuckDB file is not
+   byte-identical between rebuilds (its content is).
 
-5. Phase 5 Excel workbook (a few seconds; needs the database from step 2 and the documents from step 3):
-     python src\phase5_excel.py
-     python -m pytest tests\test_phase5_excel.py -q
-     python src\phase5_excel.py --qa-report
-   Output: outputs\phase5\fpa_month_end_close_analysis.xlsx, MANIFEST.json, PHASE5_QA_REPORT.md.
-   Exit code 1 = missing input, 2 = Phase 4 hand-off or reconciliation failed. LibreOffice (soffice) is needed for 2 tests; without it they are skipped and reported INCOMPLETE. The workbook has not been opened in Microsoft Excel.
-   Any edit to src\phase5_excel.py or to the Phase 4 documents requires re-running step 5 (the manifest records the generator hash).
+5. EXCEL WORKBOOK (a few seconds; needs the database from step 2 and the documents from step 3)
+     python src\excel_workbook_builder.py
+     python -m pytest tests\test_excel_workbook.py -q
+     python src\excel_workbook_builder.py --qa-report
+   Output: excel\fpa_month_end_close_analysis.xlsx (plus MANIFEST.json and EXCEL_QA_REPORT.md, git-ignored).
+   LibreOffice (soffice) is needed for 2 tests; without it they are skipped and the run is reported INCOMPLETE.
+   The workbook has not been opened in Microsoft Excel.
 
-6. Rebuild the dashboard HTML (added in Phase 9; this command exited 0 in the Phase 7 isolated re-run, step 07_phase6_build):
-     python src\phase6_dashboard.py
-   Open outputs\phase6\fpa_financial_analytics_dashboard.html in a browser. It is a standalone file: no server, no network.
+6. DASHBOARD
+     python src\dashboard_builder.py
+   Rebuilds dashboard\fpa_financial_analytics_dashboard.html. It needs the raw CSV (step 0a), the cleaned CSV (step 0b) and the
+   workbook manifest (step 5) only to record their hashes in the page. Open the HTML in a browser: no server, no network.
+   Optional browser tests (need Playwright + Chromium):  python tests\dashboard_browser_qa.py
 
-Nothing here commits, pushes or publishes anything. Not yet run on Windows (built and tested on Linux).
+Nothing here commits, pushes or publishes anything. Built and tested on Linux; not yet run on Windows.

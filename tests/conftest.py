@@ -1,8 +1,8 @@
-"""pytest configuration for the Phase 4 tests.
+"""pytest configuration for the SQL analysis tests.
 
 Why this file exists: tests that need the private canonical cleaned CSV are marked `fulldata` and are SKIPPED when the
 CSV is absent. A skipped test proves nothing, so a run in which any `fulldata` test was skipped is reported loudly as
-INCOMPLETE and exits non-zero. Set P4_ALLOW_SKIPPED_FULLDATA=1 only for a deliberate fixture-only run (for example on a
+INCOMPLETE and exits non-zero. Set ALLOW_SKIPPED_FULLDATA_TESTS=1 only for a deliberate fixture-only run (for example on a
 machine that never has the private CSV); the banner is still printed.
 """
 from __future__ import annotations
@@ -45,5 +45,5 @@ def pytest_sessionfinish(session, exitstatus):
     tr = session.config.pluginmanager.get_plugin("terminalreporter")
     if tr is None or session.exitstatus != 0:
         return
-    if _skipped_fulldata(tr) and os.environ.get("P4_ALLOW_SKIPPED_FULLDATA") != "1":
+    if _skipped_fulldata(tr) and os.environ.get("ALLOW_SKIPPED_FULLDATA_TESTS") != "1":
         session.exitstatus = 1  # never report an all-skipped important test set as a passing run

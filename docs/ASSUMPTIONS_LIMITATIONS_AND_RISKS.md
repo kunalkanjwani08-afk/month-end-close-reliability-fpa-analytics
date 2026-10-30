@@ -2,18 +2,17 @@
 
 **Month-End Close Reliability & Financial Performance Analytics**
 
-> **Status (updated at Phase 9 publication, 30 Oct 2026):** published as part of the complete project. The owner decided to publish the whole project, including the dataset he describes as synthetic. Dataset provenance and redistribution rights remain **owner-stated and not independently verified**. Any wording below from Phase 8 that calls the release *blocked*, *draft* or *not approved* describes the Phase 8 state and is superseded by [PUBLICATION_DECISION.md](PUBLICATION_DECISION.md). No calculation, figure or finding was changed.
 > **Data:** fictional NovaBridge Industries; owner-described as synthetic.
 > **Evidence labels:** Verified / Owner-stated / Assumption / Unresolved.
 > **No resolutions are invented.** Where the project cannot resolve an item, this register says what evidence would.
 
-Related: [Executive summary](EXECUTIVE_SUMMARY.md) · [Metrics](FINANCIAL_METRICS_AND_METHODOLOGY.md) · [QA summary](QA_AND_VALIDATION_SUMMARY.md) · Primary source: [`outputs/phase7/PHASE7_QA_REPORT.md`](../outputs/phase7/PHASE7_QA_REPORT.md)
+Related: [Executive summary](EXECUTIVE_SUMMARY.md) · [Metrics](FINANCIAL_METRICS.md) · Primary source: [`excel/issue_log.xlsx`](../excel/issue_log.xlsx)
 
 ---
 
 ## 1. Summary
 
-| # | Item | Class | Phase 7 issue | Publication blocker? |
+| # | Item | Class | Independent validation issue | Publication blocker? |
 |---|---|---|---|---|
 | 1 | Synthetic status, provenance and licence unverified | Unresolved | ISS-06 | **Yes** |
 | 2 | Posted-only eligibility (R6) | Assumption | ISS-07 | No (must be presented as provisional) |
@@ -27,13 +26,13 @@ Related: [Executive summary](EXECUTIVE_SUMMARY.md) · [Metrics](FINANCIAL_METRIC
 | 10 | NOS versus EA unit equivalence | Unresolved | ISS-15 | No |
 | 11 | Ambiguous comma-formatted amounts | Empirical interpretation | ISS-16 | No |
 | 12 | 4,996 non-Posted records in neither dashboard population | Documented gap | ISS-18 | No |
-| 13 | GL / account-group mapping not authenticated | Assumption (accepted limitation) | ISS-19 (Phase 8 supplemental; **not** in the Phase 7 issue log, which is unchanged) | No |
-| 14 | Windows and clean-machine reproducibility untested | Not tested | ISS-05 | **Yes** (Phase 7 recommendation) |
-| 15 | Native Microsoft Excel validation untested | Not tested | stated in Phase 5 and 7 | No |
+| 13 | GL / account-group mapping not authenticated | Assumption (accepted limitation) | ISS-19 (Documentation supplemental; **not** in the independent validation issue log, which is unchanged) | No |
+| 14 | Windows and clean-machine reproducibility untested | Not tested | ISS-05 | **Yes** (Independent validation recommendation) |
+| 15 | Native Microsoft Excel validation untested | Not tested | stated in Excel workbook and 7 | No |
 | 16 | Firefox, Safari, screen reader, physical printer untested | Not tested | UI50–UI52 | No |
 | 17 | QC reports contain machine-specific paths | Open defect | ISS-03 | **Yes** |
 
-Items 1, 14 and 17 are the ones Phase 7 names as conditions for public publication (ISS-06, ISS-03 and ISS-05). The repository is public and the raw CSV is in its `main` branch (verified 2026-10-30), so item 1 is a live exposure, not only a future-publication risk; it belongs with item 1.
+Items 1, 14 and 17 are the ones independent validation names as conditions for public publication (ISS-06, ISS-03 and ISS-05). The repository is public and contains the raw dataset (gzip) and the cleaned dataset, so item 1 is a live exposure, not only a future-publication risk.
 
 ---
 
@@ -41,9 +40,9 @@ Items 1, 14 and 17 are the ones Phase 7 names as conditions for public publicati
 
 ### 1. Dataset synthetic status, provenance and licence are not independently verified
 
-- **What is uncertain.** The project owner states the data is synthetic. No provenance record, generation method or redistribution licence exists to verify that ([`docs/DATA_PROVENANCE.md`](../docs/DATA_PROVENANCE.md)). The extract contains person-like cost-centre owner names and system user IDs; this is harmless if the data is synthetic and sensitive if it is not. The raw CSV has been tracked by git since the first stage (commit `1d601c0`) and the repository has a GitHub remote. **The Phase 8 correction round verified (2026-10-30, read-only GitHub API call) that the repository is public and that the raw CSV is present in the public `main` branch.** Earlier project notes recorded the repository as created private; when it became public is not known.
+- **What is uncertain.** The project owner states the data is synthetic. No provenance record, generation method or redistribution licence exists to verify that ([`docs/DATA_PROVENANCE.md`](../docs/DATA_PROVENANCE.md)). The extract contains person-like cost-centre owner names and system user IDs; this is harmless if the data is synthetic and sensitive if it is not. The raw CSV has been tracked by git since the first stage (commit `1d601c0`) and the repository has a GitHub remote. **The documentation correction round verified (2026-10-30, read-only GitHub API call) that the repository is public and that the raw CSV is present in the public `main` branch.** Earlier project notes recorded the repository as created private; when it became public is not known.
 - **Why it matters.** Redistribution rights and privacy exposure decide whether anything can be published. The dashboard embeds line-level amounts for 136,330 lines and document numbers for 58,340 lines.
-- **Current handling.** Owner-stated label kept ("owner-described as synthetic"). **Not private:** the raw CSV was committed in the earlier project history and is in the public `main` branch. Phase 7 pushed nothing further; the Phase 8 documents have not been committed or pushed by this work; the Phase 2 to Phase 8 outputs are not on the remote. The owner must check the current visibility and decide manually whether to make the repository private; that would not erase history, forks or copies already downloaded. Redistribution of the data remains uncleared. The dashboard loads no external resources; user IDs and cost-centre owner names are not embedded in the dashboard. Phase 7 marks this BLOCKED.
+- **Current handling.** Owner-stated label kept ("owner-described as synthetic"). **Not private:** the repository is public, and the raw dataset was committed in earlier history (an uncompressed copy stays in git history). Redistribution of the data remains uncleared; making the repository private later would not erase history, forks or copies already downloaded. The dashboard loads no external resources; user IDs and cost-centre owner names are not embedded in the dashboard.
 - **What cannot safely be concluded.** That the data is synthetic; that it may be redistributed; that any result describes a real company; that the extract is free of personal data.
 - **Evidence that would resolve it.** A written provenance and generation statement from the owner, a licence or an explicit statement of ownership, and an owner decision on the public repository and its history (the raw file is in public `main`).
 
@@ -65,7 +64,7 @@ Items 1, 14 and 17 are the ones Phase 7 names as conditions for public publicati
 
 ### 4. Sign convention is unresolved (R9)
 
-- **What is uncertain.** Whether negative amounts are credits, reversals, contra items or noise. Observed negative shares (Phase 1–3 profile of rows labelled Actual scale): GL 4190 discounts 57.8%, GL 5120 purchase price variance 31.7%, GL 7200 FX gain or loss 50.4%, most other accounts 7%–15%. In the cleaned file 33,080 rows have exactly one amount column of opposite sign to the others.
+- **What is uncertain.** Whether negative amounts are credits, reversals, contra items or noise. Observed negative shares (Project scoping–3 profile of rows labelled Actual scale): GL 4190 discounts 57.8%, GL 5120 purchase price variance 31.7%, GL 7200 FX gain or loss 50.4%, most other accounts 7%–15%. In the cleaned file 33,080 rows have exactly one amount column of opposite sign to the others.
 - **Why it matters.** Variance direction, gross profit and the result proxy depend on it. Opposite-sign lines carry 89%–91% of absolute forecast error, and 1,587 duplicate candidates conflict in sign.
 - **Current handling.** No sign is changed. Costs are positive magnitudes. No variance is labelled favourable or unfavourable. Same-sign, opposite-sign and zero-involved lines are shown separately, and sign sensitivities are available (all-non-negative rows only; exclude single-column flips).
 - **What cannot safely be concluded.** That an opposite-sign line is an error; that a positive variance is good or bad; that profit measures are right in sign.
@@ -123,7 +122,7 @@ Items 1, 14 and 17 are the ones Phase 7 names as conditions for public publicati
 
 - **What is uncertain.** About 9,100–9,300 amounts per column look like `n,nnn`, which could be a thousands separator or a three-decimal comma. The cleaner reads them as thousands.
 - **Why it matters.** The other reading would change those amounts by a factor of 1,000.
-- **Current handling.** Phase 7 tested the reading against local amount ÷ FX rate: of 7,563 testable actuals, 6,940 fit the thousands reading and 0 fit the decimal reading. Phase 7 judged the evidence to support the current reading (ISS-16, low residual risk).
+- **Current handling.** Independent validation tested the reading against local amount ÷ FX rate: of 7,563 testable actuals, 6,940 fit the thousands reading and 0 fit the decimal reading. independent validation judged the evidence to support the current reading (ISS-16, low residual risk).
 - **What cannot safely be concluded.** That every `n,nnn` amount is a thousands value; the test covers only the rows where an FX check is possible.
 - **Evidence that would resolve it.** The source-system number format per feed.
 
@@ -131,7 +130,7 @@ Items 1, 14 and 17 are the ones Phase 7 names as conditions for public publicati
 
 - **What is uncertain.** Nothing about the count: 152,682 − 58,340 − 77,990 = 16,352, and 4,996 of those are non-Posted lines that would otherwise be in the status diagnostic: 4,958 have no actual amount and 38 have an undetermined scale. The diagnostic population drops only the status gate, so these fail another gate and are in no dashboard view.
 - **Why it matters.** The journal-status table on the Data Quality tab does not show every non-Posted line, so it should not be read as the full status picture.
-- **Current handling.** Counted in the row accounting, the Phase 4 waterfall and the workbook's Data Quality sheet; documented in the Phase 7 report and in [the dashboard guide](DASHBOARD_USER_GUIDE.md). The dashboard was not changed (ISS-18, Low).
+- **Current handling.** Counted in the row accounting, the SQL analysis waterfall and the workbook's Data Quality sheet; documented in the independent validation report and in [the dashboard guide](DASHBOARD_USER_GUIDE.md). The dashboard was not changed (ISS-18, Low).
 - **What cannot safely be concluded.** That the status diagnostic is complete; the value of these lines (they have no actual amount or no determined scale).
 - **Evidence that would resolve it.** An owner decision whether to display them, as a count-only row in the status table, in a future dashboard revision. This is a documentation limitation, not a calculation error.
 
@@ -139,7 +138,7 @@ Items 1, 14 and 17 are the ones Phase 7 names as conditions for public publicati
 
 - **What is uncertain.** `dim_account` (32 accounts) is built from the extract itself. The mapping from GL to name, group, FS line and statement was checked for one-to-one consistency (`a8_account_mapping_consistency`; load-validation checks L49 and L52–L55; a conflict would fail the load). Whether those mappings are right has not been checked against a real chart of accounts.
 - **Why it matters.** Section assignment decides whether a line is revenue, COGS, people, opex or balance sheet, and therefore every total.
-- **Accepted limitation (ISS-19, Phase 8 supplemental).** The GL/account_group/section mapping is internally consistent and was used in the independent recalculation, but its accounting correctness has not been independently authenticated against an authoritative chart of accounts. The Phase 7 issue log lists ISS-01 to ISS-18 and is deliberately not edited; ISS-19 is recorded only in Phase 8 documents.
+- **Accepted limitation (ISS-19, documentation supplemental).** The GL/account_group/section mapping is internally consistent and was used in the independent recalculation, but its accounting correctness has not been independently authenticated against an authoritative chart of accounts. The independent validation issue log lists ISS-01 to ISS-18 and is deliberately not edited; ISS-19 is recorded only in documentation documents.
 - **Current handling.** The mapping is internally consistent and is used as provided. No account was reclassified or invented.
 - **What cannot safely be concluded.** That the account classification is correct in an accounting sense, or that the 32 accounts are the complete chart.
 - **Evidence that would resolve it.** The owner's chart of accounts with section and statement per account.
@@ -148,7 +147,7 @@ Items 1, 14 and 17 are the ones Phase 7 names as conditions for public publicati
 
 - **What is uncertain.** Every re-run was on a Linux container with packages already installed (numpy 2.5.3 installed against a pin of 2.4.6). No virtual-environment install from `requirements.txt` and no Windows run was done, although the owner works on Windows with VS Code. The cleaner takes about 4–5 minutes and about 1.25 GB of memory.
 - **Why it matters.** The corrected run instructions have not been shown to work on the target machine, and the pins have not been exercised in a fresh install.
-- **Current handling.** README and guides state the limit. `HOW_TO_RUN.txt` was corrected after Phase 7 (ISS-01, ISS-02) and regression-tested on Linux. The dashboard-build command is not in `HOW_TO_RUN.txt` (it ran with exit 0 in Phase 7); adding it is a recommendation for the next phase.
+- **Current handling.** README and guides state the limit. `HOW_TO_RUN.txt` was corrected after independent validation (ISS-01, ISS-02) and regression-tested on Linux. The dashboard-build command is not in `HOW_TO_RUN.txt` (it ran with exit 0 in independent validation); adding it is a recommendation for the next phase.
 - **What cannot safely be concluded.** That the project installs and runs on Windows or on a clean machine; that `requirements.txt` is complete (Playwright and LibreOffice, used only for QA, are not listed).
 - **Evidence that would resolve it.** A fresh-venv install and a full documented run on the Windows laptop, with `pip check`.
 
@@ -156,42 +155,29 @@ Items 1, 14 and 17 are the ones Phase 7 names as conditions for public publicati
 
 - **What is uncertain.** The workbook was written with XlsxWriter and checked with LibreOffice 24.2 only. Table styles, conditional-format colours, fonts, frozen panes, filters, navigation links and chart appearance in Excel have not been observed.
 - **Why it matters.** The workbook is the main finance-facing deliverable.
-- **Current handling.** The limit is stated in the workbook guide and the Phase 5 and Phase 7 reports; 3,819 formulas were recalculated independently and matched.
+- **Current handling.** The limit is stated in the workbook guide and the Excel workbook and independent validation reports; 3,819 formulas were recalculated independently and matched.
 - **What cannot safely be concluded.** That the workbook looks or behaves as intended in Excel.
 - **Evidence that would resolve it.** Opening and walking the workbook in Microsoft Excel and recording the result.
 
 ### 16. Firefox, Safari, screen-reader and physical-printer testing remain outstanding
 
-- **What is uncertain.** The dashboard was tested in headless Chromium only. Keyboard operation and ARIA attributes were asserted programmatically, but no assistive-technology test, no other browser and no physical printer were used (Phase 7 UI50, UI51, UI52).
+- **What is uncertain.** The dashboard was tested in headless Chromium only. Keyboard operation and ARIA attributes were asserted programmatically, but no assistive-technology test, no other browser and no physical printer were used (Independent validation UI50, UI51, UI52).
 - **Why it matters.** Layout, scripts, accessibility and print output may differ.
-- **Current handling.** Stated in the dashboard guide and Phase 7 report; no accessibility, cross-browser or print-quality claim is made.
+- **Current handling.** Stated in the dashboard guide and independent validation report; no accessibility, cross-browser or print-quality claim is made.
 - **What cannot safely be concluded.** That the dashboard works in Firefox or Safari, is accessible, or prints correctly on paper.
 - **Evidence that would resolve it.** Manual runs in Firefox and Safari, an NVDA/JAWS/VoiceOver walk-through, and a physical print.
 
 ### 17. QC reports contain machine-specific paths requiring portable handling
 
-- **What is uncertain.** Nothing about the fact: `data/processed/QC_Report.txt` and `qc_summary.json` record the build environment's input and scratch paths, and they are not git-ignored (ISS-03). Phase 8 verified that the files still contain them and did not alter them.
-- **Why it matters.** Paths disclose the build environment's layout and the files would be published with the repository. Rule 10 of the Phase 8 brief forbids exposing machine paths.
-- **Current handling.** Not changed in Phase 8 (the cleaned and QC files are preserved). This documentation package quotes no machine path. Related findings: `tests/phase6_dashboard_qa.py` finds the palette validator through a machine-specific glob (ISS-04), and `tests/phase7/p7_pipeline_checks.py` hard-codes a scratch directory.
+- **What is uncertain.** Nothing about the fact: `data/processed/QC_Report.txt` and `qc_summary.json` record the build environment's input and scratch paths, and they are not git-ignored (ISS-03). documentation verified that the files still contain them and did not alter them.
+- **Why it matters.** Paths disclose the build environment's layout and the files would be published with the repository. Rule 10 of the documentation brief forbids exposing machine paths.
+- **Current handling.** Not changed in documentation (the cleaned and QC files are preserved). This documentation package quotes no machine path. Related findings: `tests/dashboard_browser_qa.py` finds the palette validator through a machine-specific glob (ISS-04), and the one-off validation scripts (not published) hard-codes a scratch directory.
 - **What cannot safely be concluded.** That the repository is ready to publish.
-- **Evidence that would resolve it.** Regenerating or sanitising the QC files with a portable (repository-relative) path, adding them to `.gitignore` if appropriate, and re-checking hashes and tests. This is a Phase 9 action requiring owner approval, because it modifies the Phase 3 QC outputs.
+- **Evidence that would resolve it.** Regenerating or sanitising the QC files with a portable (repository-relative) path, adding them to `.gitignore` if appropriate, and re-checking hashes and tests. This is a publication action requiring owner approval, because it modifies the data cleaning QC outputs.
 
 ---
 
-## 3. Additional documentation gaps found in Phase 8
-
-These are not among the 17 items required by the brief. They were found while cross-checking the documents.
-
-| Gap | Effect | Handling |
-|---|---|---|
-| The root `README.md` and `docs/FINANCIAL_METRICS.md` pre-date Phases 4–7 (the README says the dashboard does not exist yet; the metrics file says it contains no results and gives an unguarded variance %) | A reader of the repository would get an outdated picture | Preserved unchanged; replaced in the package by `README_PHASE8_DRAFT.md` and `FINANCIAL_METRICS_AND_METHODOLOGY.md` pending owner approval |
-| The dashboard build command is not in `HOW_TO_RUN.txt` | The reproducibility sequence is incomplete | Documented; recommended for Phase 9 |
-| Playwright and LibreOffice are used only by QA and are not in `requirements.txt` | A QA re-run on a clean machine would fail until they are installed | Documented in the README |
-| Phase labelling differs between documents (the brief's Phase 8 is the documentation phase, while some project files group the work differently) | Confusion about which "Phase N" a statement refers to | A numbering note in the README |
-| The Phase 6 report states that print outputs only the visible tab, while its own print check and the print stylesheet show all nine views | A reader could misdescribe print behaviour | The dashboard guide follows the code and the check; noted in the Phase 8 QA report |
-| Three Phase 7 workbooks (`DATA_LINEAGE_RECONCILIATION.xlsx`, `FINANCIAL_RECONCILIATION.xlsx`, `ISSUE_LOG.xlsx`) were rewritten about two seconds after the Phase 7 SHA-256 manifest was produced, so their manifest hashes and sizes are stale | The manifest cannot verify these three files; the other 216 re-hashed entries match | Not altered (Phase 7 evidence); current hashes are in the file catalogue; regenerating the manifest is recommended for Phase 9 |
-
-## 4. Dependencies between items
+## 3. Dependencies between items
 
 - Items 3, 4, 8 and 10 interact: the scale identity (3) depends on unit equality (10), gross profit (8) depends on the sign policy (4), and the sign policy also governs the 1,587 sign-conflict duplicates (6).
-- Items 1, 14 and 17 are the practical publication blockers. Resolving items 2–11 would change the numbers; resolving 14–17 would change only what has been verified.
+- Items 1, 14 and 17 are the practical open questions. Resolving items 2–11 would change the numbers; resolving 14–17 would change only what has been verified.

@@ -1,2 +1,0 @@
-[pipeline] {'PASS': 32, 'INFO': 3, 'FAIL': 1, 'NOT TESTED': 1}
-   FAIL PR.03.detail Documented step 4 (pytest tests) right after a DB rebuild: PASS/FAIL/SKIP | exp 0 FAIL | act 123 PASS / 2 FAIL / 0 SKIP | FAILED: test_lineage_and_source_identity_recorded, test_manifest_matches_the_saved_workbook_and_inputs - DB SHA-256 changed on rebuild (ISS-02)

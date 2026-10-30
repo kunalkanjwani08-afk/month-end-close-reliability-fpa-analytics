@@ -1,9 +1,0 @@
-pip_install_exit=0
-pip_check_exit=0
-compileall_exit=0
-pytest_fixture_exit=0
-phase4_pipeline_exit=0
-pytest_phase4_full_exit=0
-phase5_excel_exit=0
-pytest_phase5_exit=0
-DONE

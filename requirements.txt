@@ -1,5 +1,5 @@
 # Requires Python 3.11 or newer (pandas 3.x).
-# Pins checked to exist on PyPI; a full venv install + `pip check` is done when the code stage starts.
+# Pinned versions used for the published results. QA-only tools (not installed by this file): Playwright + Chromium, LibreOffice.
 pandas==3.0.5
 numpy==2.4.6
 openpyxl==3.1.5

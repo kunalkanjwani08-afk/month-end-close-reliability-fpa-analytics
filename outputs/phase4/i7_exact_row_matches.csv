@@ -1,4 +1,0 @@
-definition,groups_with_matches,rows_in_matches
-identical in 41 fields (row_id and extract batch ignored),0,0
-identical in all 42 source fields (row_id ignored),0,0
-"same document_no + entity + GL + the five amount texts (strict text equality, no tolerance)",9,18

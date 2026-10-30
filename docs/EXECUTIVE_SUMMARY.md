@@ -2,11 +2,10 @@
 
 **Month-End Close Reliability & Financial Performance Analytics**
 
-> **Status (updated at Phase 9 publication, 30 Oct 2026):** published as part of the complete project. The owner decided to publish the whole project, including the dataset he describes as synthetic. Dataset provenance and redistribution rights remain **owner-stated and not independently verified**. Any wording below from Phase 8 that calls the release *blocked*, *draft* or *not approved* describes the Phase 8 state and is superseded by [PUBLICATION_DECISION.md](PUBLICATION_DECISION.md). No calculation, figure or finding was changed.
 > **Data:** fictional NovaBridge Industries. The owner describes the data as synthetic; provenance and licence are not independently verified. This summary describes a simulated extract, not a real company.
 > **Evidence labels:** Verified / Owner-stated / Assumption / Unresolved.
 
-Related: [Project overview](PROJECT_OVERVIEW.md) · [Metrics](FINANCIAL_METRICS_AND_METHODOLOGY.md) · [Risks](ASSUMPTIONS_LIMITATIONS_AND_RISKS.md) · [QA summary](QA_AND_VALIDATION_SUMMARY.md)
+Related: [Metrics](FINANCIAL_METRICS.md) · [Risks](ASSUMPTIONS_LIMITATIONS_AND_RISKS.md)
 
 ---
 
@@ -54,10 +53,10 @@ Favourable or unfavourable labels; forecast-skill claims; a single gross-profit 
 
 | Item | Status |
 |---|---|
-| Phases 1–7 | Complete |
-| Phase 8 documentation | Complete; published in `docs/` (Phase 9 replaced the root README) |
+| Scoping, cleaning, SQL analysis, Excel workbook, dashboard and independent validation | Complete |
+| Documentation | Complete; in `docs/` |
 | Public release | **Published 30 Oct 2026** (owner decision; provenance still owner-stated and unverified) |
 
 **Blockers:** (1) data provenance and redistribution rights, including a review of the git history that contains the raw file; (2) build-machine paths in two QC files; (3) no Windows or clean-machine run. **Not tested:** native Microsoft Excel, Firefox, Safari, screen readers, a physical printer.
 
-**Decisions needed from the owner:** confirm or change the Posted-only rule; provide the sign policy for the chart of accounts; confirm provenance and licence; approve the cleanup of the QC files before any publication.
+**Decisions needed from the owner:** confirm or change the Posted-only rule; provide the sign policy for the chart of accounts; confirm provenance and licence; decide whether to clean the build paths out of the QC files.

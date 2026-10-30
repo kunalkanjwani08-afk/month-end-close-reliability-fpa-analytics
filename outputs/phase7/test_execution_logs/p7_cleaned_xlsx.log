@@ -1,1 +1,0 @@
-{"sha256": "270edc6b33ae74c46513b4529f6a6e314854c28a898c81f0877c0ac311bb3db6", "xlsx_cols": 77, "csv_cols": 192, "cols_not_in_csv": [], "rows_compared": 152682, "leftover_rows": 0, "cell_mismatches": 0, "mismatches_by_column": {}, "date_cells_normalised": 145001, "examples": []}

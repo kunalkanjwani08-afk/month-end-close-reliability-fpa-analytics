@@ -1,2 +1,0 @@
-[security] {'PASS': 7, 'INFO': 15, 'BLOCKED': 1}
-   BLOCKED SEC.prov Data provenance and redistribution licence | exp None | act None | Owner states the data is synthetic; no licence or provenance document exists to verify it (docs/DATA_PROVENANCE.md). Cannot be resolved by testing.

@@ -1,7 +1,7 @@
 # Data Dictionary
 
 Source file: `data/raw/fpa_monthly_close_raw_messy.csv` (43 columns, 152,682 data rows, SHA-256 in [DATA_PROVENANCE.md](DATA_PROVENANCE.md)).
-Related: [FINANCIAL_METRICS.md](FINANCIAL_METRICS.md) (rules and formulas), [TEST_PLAN.md](TEST_PLAN.md) (how each rule will be tested).
+Related: [FINANCIAL_METRICS.md](FINANCIAL_METRICS.md) (rules and formulas).
 
 **Status of this document: draft for review.** Nothing here has been confirmed by a source system owner or a vendor data dictionary. None of it has been implemented in code.
 

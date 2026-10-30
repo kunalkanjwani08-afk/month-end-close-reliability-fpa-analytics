@@ -1,4 +1,0 @@
-US01 carries the largest revenue share: $55.34M (27.3% of revenue in scope).
-Revenue is $4.67M below budget (2.4% of net budget) on 30,953 lines.
-Posted lines are 42.7% of all-status lines in this selection; the other statuses are excluded by provisional rule R6 — see Gross Profit & Scenarios.
-18 entity × GL cells show a persistent one-sided deviation from budget (same-sign lines, ≥12 months, ≥90% one side, ≥3%).

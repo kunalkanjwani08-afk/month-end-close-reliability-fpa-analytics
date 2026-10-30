@@ -1,10 +1,9 @@
 # Data and Cleaning Methodology
 
-> **Status (updated at Phase 9 publication, 30 Oct 2026):** published as part of the complete project. The owner decided to publish the whole project, including the dataset he describes as synthetic. Dataset provenance and redistribution rights remain **owner-stated and not independently verified**. Any wording below from Phase 8 that calls the release *blocked*, *draft* or *not approved* describes the Phase 8 state and is superseded by [PUBLICATION_DECISION.md](PUBLICATION_DECISION.md). No calculation, figure or finding was changed.
-> **Evidence labels:** **Verified** = checked against a project file or Phase 7 check · **Owner-stated** · **Assumption** = provisional project rule · **Unresolved**.
-> **Sources used:** `data/processed/QC_Report.txt`, `data/processed/qc_summary.json`, `src/clean_fpa_monthly_close.py`, `docs/DATA_DICTIONARY.md`, `docs/FINANCIAL_METRICS.md`, `docs/DATA_PROVENANCE.md`, `outputs/phase7/PHASE7_QA_REPORT.md`.
+> **Evidence labels:** **Verified** = checked against a project file or independent validation check · **Owner-stated** · **Assumption** = provisional project rule · **Unresolved**.
+> **Sources used:** `data/processed/QC_Report.txt`, `data/processed/qc_summary.json`, `src/clean_fpa_monthly_close.py`, `docs/DATA_DICTIONARY.md`, `docs/FINANCIAL_METRICS.md`, `docs/DATA_PROVENANCE.md`.
 
-Related: [Workflow](END_TO_END_WORKFLOW.md) · [Financial metrics](FINANCIAL_METRICS_AND_METHODOLOGY.md) · [Assumptions and limitations](ASSUMPTIONS_LIMITATIONS_AND_RISKS.md)
+Related: [Financial metrics](FINANCIAL_METRICS.md) · [Assumptions and limitations](ASSUMPTIONS_LIMITATIONS_AND_RISKS.md)
 
 ---
 
@@ -19,7 +18,7 @@ The cleaner turns a 43-column text extract into a 192-column analytical file **w
 | File | `fpa_monthly_close_raw_messy.csv` | Verified |
 | Size, rows, columns | 51,938,535 bytes; 152,682 data rows (152,683 lines with the header); 43 columns | Verified |
 | SHA-256 | `a0e6eddde25280aa27a60c5955743d3243b14138d876eedac0547e24a1cc6fff` | Verified |
-| Encoding | UTF-8, no byte-order mark, LF line endings | Verified (Phase 1 observation) |
+| Encoding | UTF-8, no byte-order mark, LF line endings | Verified (Project scoping observation) |
 | Storage type | Every one of the 43 columns is text | Verified |
 | Grain | One row per source extract record; `row_id` is unique, `document_no` is not. The dataset contains 152,682 source extract records, including 350 non-posting subtotal/check records. These 350 records are not treated as ordinary posted journal lines. | `row_id` uniqueness and the 350 count Verified; posting semantics Owner-stated |
 | Coverage | Six legal entities, five divisions, January 2023 to December 2025 (36 periods; 0 entity-period gaps) | Verified |
@@ -50,7 +49,7 @@ The cleaned CSV is written as UTF-8 with a byte-order mark, so the first header 
 
 ### Why the Excel review workbook is not the cleaned CSV
 
-The Phase 2 review workbook (`fpa_monthly_close_cleaned.xlsx`, 67,381,749 bytes) is a **review copy**, not the canonical dataset. Its `Cleaned_Data` sheet holds **77 fields** that are shared with the 192-column CSV; the CSV carries the remaining 115 parsed, flagged, diagnostic and eligibility columns that a person reviewing in Excel does not need and that would exceed practical workbook width. Phase 7 compared all 152,682 rows × 77 shared fields against the CSV and found **0 mismatches** (Excel date cells read as calendar dates), and confirmed that every workbook column exists in the CSV. Only the CSV is accepted by the pipeline (it is identified by its SHA-256). The workbook also embeds run metadata, so its bytes differ on every cleaner run while its content does not.
+The cleaned workbook (`data/processed/fpa_monthly_close_cleaned.xlsx`, 67,381,749 bytes) is the cleaned dataset published in this repository. It is a **review copy** of the canonical 192-column CSV, not the input of the SQL analysis. Its `Cleaned_Data` sheet holds **77 fields** that are shared with the 192-column CSV; the CSV carries the remaining 115 parsed, flagged, diagnostic and eligibility columns that a person reviewing in Excel does not need and that would exceed practical workbook width. independent validation compared all 152,682 rows × 77 shared fields against the CSV and found **0 mismatches** (Excel date cells read as calendar dates), and confirmed that every workbook column exists in the CSV. Only the CSV is accepted by the pipeline (it is identified by its SHA-256). The workbook also embeds run metadata, so its bytes differ on every cleaner run while its content does not.
 
 ## 4. Data types
 
@@ -72,7 +71,7 @@ Placeholders recognised: `###`, `#N/A`, `NA`, `N/A`, `n/a`, `null`, hyphen (`-`,
 
 ## 6. Amount parsing
 
-A strict grammar decides the number format, validated on all five amount columns. The cleaner's own scalar re-parse of all 763,410 amount cells (152,682 rows × 5 columns) agreed with its vectorised parser, and the independent parser written for Phase 7 agreed with the cleaner on presence and value for all five columns. The format counts below are Phase 7's independent classification.
+A strict grammar decides the number format, validated on all five amount columns. The cleaner's own scalar re-parse of all 763,410 amount cells (152,682 rows × 5 columns) agreed with its vectorised parser, and the independent parser written for independent validation agreed with the cleaner on presence and value for all five columns. The format counts below are independent validation's independent classification.
 
 | Format | Example | Counted in `actual_usd` |
 |---|---|---:|
@@ -84,7 +83,7 @@ A strict grammar decides the number format, validated on all five amount columns
 | Comma pattern `n,nnn` (ambiguous, read as thousands; see below) | `1,234` | 9,317 |
 | Placeholder or blank | `###`, `NA`, `-` | 9,259 |
 
-Parentheses and a leading minus mean negative; `$` and surrounding spaces are tolerated; anything outside the grammar is "unparsed" and never guessed (none remained). **Ambiguous comma amounts:** about 9,100–9,300 amounts per column look like `n,nnn`, which could be a thousands separator or a three-decimal comma. The cleaner reads them as thousands. Phase 7 tested this reading against local amount ÷ FX rate: of 7,563 testable actuals, 6,940 fit the thousands reading and 0 fit the decimal reading (issue ISS-16, accepted, low residual risk). This is an **empirical interpretation, not a confirmed rule**.
+Parentheses and a leading minus mean negative; `$` and surrounding spaces are tolerated; anything outside the grammar is "unparsed" and never guessed (none remained). **Ambiguous comma amounts:** about 9,100–9,300 amounts per column look like `n,nnn`, which could be a thousands separator or a three-decimal comma. The cleaner reads them as thousands. independent validation tested this reading against local amount ÷ FX rate: of 7,563 testable actuals, 6,940 fit the thousands reading and 0 fit the decimal reading (issue ISS-16, accepted, low residual risk). This is an **empirical interpretation, not a confirmed rule**.
 
 ## 7. Scale restoration
 
@@ -109,7 +108,7 @@ Parentheses and a leading minus mean negative; `$` and surrounding spaces are to
 
 ## 10. Entity and statement eligibility
 
-- **Junk and unresolved entities.** `TEST ENTITY`, `Do not use`, `xxx` (by name) and codes `99` and `T999` (by code) mark 204 rows in total (173 by name, 144 by code); 16 further rows have neither a code nor a name and cannot be resolved. These are excluded, not deleted. Earlier Phase 1 documents quote 173 (names only); the cleaner's union of name and code is 204. Only `TEST ENTITY` is owner-confirmed as non-reporting; `Do not use` and `xxx` are an Assumption.
+- **Junk and unresolved entities.** `TEST ENTITY`, `Do not use`, `xxx` (by name) and codes `99` and `T999` (by code) mark 204 rows in total (173 by name, 144 by code); 16 further rows have neither a code nor a name and cannot be resolved. These are excluded, not deleted. Earlier project scoping documents quote 173 (names only); the cleaner's union of name and code is 204. Only `TEST ENTITY` is owner-confirmed as non-reporting; `Do not use` and `xxx` are an Assumption.
 - **Statements.** Ten raw labels are normalised to two: P&L (145,534 rows) and Balance Sheet (7,148 rows). A balance-sheet line is out of scope for a P&L metric and the reverse (7,125 balance-sheet rows are excluded from the P&L population after earlier gates). The two are never added together. The measurement basis of balance-sheet lines (opening, closing or movement) is **Unresolved**.
 
 ## 11. Journal statuses
@@ -139,12 +138,12 @@ For P&L actual the reasons are: non-posting 350; junk entity 204; entity unresol
 ## 13. Cleaning validation
 
 - The cleaner runs **43 in-memory checks** before writing and **27 read-back checks** on the files it wrote; all PASS in the approved run. Examples: rows in equal rows out; `row_id` unique and in raw order; non-posting rows keep a blank GL; an independent scalar re-parse of all 763,410 amount cells agrees with the vectorised parser; `actual_usd_adj` equals parsed × decided divisor on every decided row; undetermined rows have no adjusted value; the exclusion identity closes for each scope.
-- Phase 7 re-ran the cleaner on a copy of the raw file: the output CSV was **byte-identical** (SHA-256 `c184b677…`), the raw copy was unchanged, and the cleaner's own checks showed 0 failures.
-- Phase 7 independently re-derived every row's exclusion reason from the raw values and matched all 152,682 rows in all three scopes.
+- Independent validation re-ran the cleaner on a copy of the raw file: the output CSV was **byte-identical** (SHA-256 `c184b677…`), the raw copy was unchanged, and the cleaner's own checks showed 0 failures.
+- Independent validation independently re-derived every row's exclusion reason from the raw values and matched all 152,682 rows in all three scopes.
 
 ## 14. Row preservation and integrity
 
-152,682 raw rows = 152,682 cleaned rows. The `row_id` sets are identical, order is preserved, the raw-value columns are preserved byte for byte, and the raw file's hash was recomputed after the run and unchanged. The reconciliation from 152,682 source rows to the dashboard populations is in [QA_AND_VALIDATION_SUMMARY.md](QA_AND_VALIDATION_SUMMARY.md).
+152,682 raw rows = 152,682 cleaned rows. The `row_id` sets are identical, order is preserved, the raw-value columns are preserved byte for byte, and the raw file's hash was recomputed after the run and unchanged. The reconciliation from 152,682 source rows to the dashboard populations is in QA_AND_VALIDATION_SUMMARY.md.
 
 ## 15. What cleaning did not resolve
 
