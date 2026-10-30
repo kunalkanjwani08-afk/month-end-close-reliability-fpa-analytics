@@ -55,8 +55,8 @@ Favourable or unfavourable labels; forecast-skill claims; a single gross-profit 
 |---|---|
 | Scoping, cleaning, SQL analysis, Excel workbook, dashboard and independent validation | Complete |
 | Documentation | Complete; in `docs/` |
-| Public release | **Published 30 Oct 2026** (owner decision; provenance still owner-stated and unverified) |
+| Public release | **Published 30 Oct 2026**, public, no licence |
 
-**Blockers:** (1) data provenance and redistribution rights, including a review of the git history that contains the raw file; (2) build-machine paths in two QC files; (3) no Windows or clean-machine run. **Not tested:** native Microsoft Excel, Firefox, Safari, screen readers, a physical printer.
+**Open limitations:** the analytical rules listed in the [risk register](ASSUMPTIONS_LIMITATIONS_AND_RISKS.md) (Posted-only eligibility, scale restoration, sign convention, duplicates, consolidation) remain provisional or unresolved. **Not tested:** Windows, native Microsoft Excel, Firefox, Safari, screen readers, a physical printer.
 
-**Decisions needed from the owner:** confirm or change the Posted-only rule; provide the sign policy for the chart of accounts; confirm provenance and licence; decide whether to clean the build paths out of the QC files.
+**Decisions still needed from the owner:** confirm or change the Posted-only rule, and provide the sign policy for the chart of accounts.

@@ -1,0 +1,45 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  # Fast checks that need no data: syntax, imports and the 42 fixture tests.
+  fixture-tests:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.13"
+          cache: pip
+      - run: pip install -r requirements.txt
+      - run: python -m compileall -q src tests
+      - name: Fixture tests (no real data)
+        run: python -m pytest tests/test_sql_pipeline_units.py -q
+        env:
+          ALLOW_SKIPPED_FULLDATA_TESTS: "1"
+
+  # End-to-end: regenerate the cleaned data from the raw file, run the SQL pipeline and the full-data tests.
+  # The Excel workbook tests need LibreOffice and are not part of this job.
+  full-data-reproduction:
+    runs-on: ubuntu-latest
+    needs: fixture-tests
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.13"
+          cache: pip
+      - run: pip install -r requirements.txt
+      - name: Decompress the raw dataset
+        run: gunzip -k data/raw/fpa_monthly_close_raw_messy.csv.gz
+      - name: Regenerate the cleaned dataset (cleaner checks the raw file's SHA-256 first)
+        run: python src/clean_fpa_monthly_close.py --output-dir data/processed --no-excel-readback
+      - name: SQL analysis pipeline (fails unless every validation check passes)
+        run: python src/sql_analysis_pipeline.py
+      - name: Full-data tests (all except the Excel workbook tests)
+        run: python -m pytest tests -q --ignore=tests/test_excel_workbook.py --ignore=tests/dashboard_browser_qa.py --ignore=tests/dashboard_negative_controls.py

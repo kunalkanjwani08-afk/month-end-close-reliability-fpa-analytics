@@ -1,8 +1,8 @@
 {
   "script_version": "1.0.0",
-  "timestamp": "2026-10-28 11:55:08",
+  "timestamp": "2026-10-30 19:55:13",
   "integrity": {
-    "path": "/mnt/user-data/uploads/Downloads/fpa_monthly_close_raw_messy.csv",
+    "path": "fpa_monthly_close_raw_messy.csv",
     "bytes": 51938535,
     "sha256": "a0e6eddde25280aa27a60c5955743d3243b14138d876eedac0547e24a1cc6fff",
     "expected_sha256": "a0e6eddde25280aa27a60c5955743d3243b14138d876eedac0547e24a1cc6fff",
@@ -539,5 +539,5 @@
     }
   ],
   "raw_unchanged": true,
-  "seconds": 304.4
+  "seconds": 259.3
 }

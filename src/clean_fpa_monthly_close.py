@@ -340,7 +340,7 @@ def integrity_gate(path: Path, enforce: bool = True) -> Dict[str, object]:
     """Recompute hash and size. STOP (raise) if they differ from the expected."""
     size = path.stat().st_size
     digest = sha256_file(path)
-    info = {"path": str(path), "bytes": size, "sha256": digest,
+    info = {"path": path.name, "bytes": size, "sha256": digest,
             "expected_sha256": EXPECTED_SHA256, "expected_bytes": EXPECTED_BYTES,
             "hash_match": digest == EXPECTED_SHA256,
             "size_match": size == EXPECTED_BYTES}
@@ -3220,9 +3220,9 @@ def render_qc_report(ctx: Ctx, integrity: Dict[str, object], tables: Dict[str, o
     for k, p in paths.items():
         try:
             hh = sha256_file(Path(p)) if Path(p).suffix.lower() in (".csv", ".xlsx") else "-"
-            add(f"  {k:8s}: {p}  ({Path(p).stat().st_size:,} bytes)  sha256={hh}")
+            add(f"  {k:8s}: {Path(p).name}  ({Path(p).stat().st_size:,} bytes)  sha256={hh}")
         except OSError:
-            add(f"  {k:8s}: {p}")
+            add(f"  {k:8s}: {Path(p).name}")
     add(f"  CANONICAL cleaned dataset: the 'csv' file above ({D.shape[1]} columns, {len(D):,} rows). The xlsx Cleaned_Data sheet is a {len(EXCEL_CLEANED_COLUMNS)}-column review copy.")
     add("  Reported totals are PROVISIONAL (Posted-only rule R6 is proposed, not confirmed).")
     add("")

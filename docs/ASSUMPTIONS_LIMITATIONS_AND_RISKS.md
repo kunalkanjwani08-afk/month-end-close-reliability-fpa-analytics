@@ -12,9 +12,9 @@ Related: [Executive summary](EXECUTIVE_SUMMARY.md) · [Metrics](FINANCIAL_METRIC
 
 ## 1. Summary
 
-| # | Item | Class | Independent validation issue | Publication blocker? |
+| # | Item | Class | Independent validation issue | Blocks use of the results? |
 |---|---|---|---|---|
-| 1 | Synthetic status, provenance and licence unverified | Unresolved | ISS-06 | **Yes** |
+| 1 | Owner-created synthetic data; origin not independently verifiable | Owner statement | ISS-06 | No (disclosed in the README) |
 | 2 | Posted-only eligibility (R6) | Assumption | ISS-07 | No (must be presented as provisional) |
 | 3 | Scale restoration | Assumption | ISS-08 | No |
 | 4 | Sign convention (R9) | Unresolved | ISS-09 | No |
@@ -27,24 +27,24 @@ Related: [Executive summary](EXECUTIVE_SUMMARY.md) · [Metrics](FINANCIAL_METRIC
 | 11 | Ambiguous comma-formatted amounts | Empirical interpretation | ISS-16 | No |
 | 12 | 4,996 non-Posted records in neither dashboard population | Documented gap | ISS-18 | No |
 | 13 | GL / account-group mapping not authenticated | Assumption (accepted limitation) | ISS-19 (Documentation supplemental; **not** in the independent validation issue log, which is unchanged) | No |
-| 14 | Windows and clean-machine reproducibility untested | Not tested | ISS-05 | **Yes** (Independent validation recommendation) |
+| 14 | Windows and native-Excel reproducibility untested (Linux fresh-venv run done) | Partly tested | ISS-05 | No |
 | 15 | Native Microsoft Excel validation untested | Not tested | stated in Excel workbook and 7 | No |
 | 16 | Firefox, Safari, screen reader, physical printer untested | Not tested | UI50–UI52 | No |
-| 17 | QC reports contain machine-specific paths | Open defect | ISS-03 | **Yes** |
+| 17 | QC reports contained machine-specific paths | Resolved (QC files regenerated) | ISS-03 | No |
 
-Items 1, 14 and 17 are the ones independent validation names as conditions for public publication (ISS-06, ISS-03 and ISS-05). The repository is public and contains the raw dataset (gzip) and the cleaned dataset, so item 1 is a live exposure, not only a future-publication risk.
+Items 14 and 17 were conditions named by independent validation. Item 17 is resolved and item 14 is partly resolved (see below). Item 1 remains an owner statement that others cannot verify; it is disclosed in the README.
 
 ---
 
 ## 2. The register
 
-### 1. Dataset synthetic status, provenance and licence are not independently verified
+### 1. Dataset provenance: owner-created synthetic data that others cannot independently verify
 
-- **What is uncertain.** The project owner states the data is synthetic. No provenance record, generation method or redistribution licence exists to verify that ([`docs/DATA_PROVENANCE.md`](../docs/DATA_PROVENANCE.md)). The extract contains person-like cost-centre owner names and system user IDs; this is harmless if the data is synthetic and sensitive if it is not. The raw CSV has been tracked by git since the first stage (commit `1d601c0`) and the repository has a GitHub remote. **The documentation correction round verified (2026-10-30, read-only GitHub API call) that the repository is public and that the raw CSV is present in the public `main` branch.** Earlier project notes recorded the repository as created private; when it became public is not known.
-- **Why it matters.** Redistribution rights and privacy exposure decide whether anything can be published. The dashboard embeds line-level amounts for 136,330 lines and document numbers for 58,340 lines.
-- **Current handling.** Owner-stated label kept ("owner-described as synthetic"). **Not private:** the repository is public, and the raw dataset was committed in earlier history (an uncompressed copy stays in git history). Redistribution of the data remains uncleared; making the repository private later would not erase history, forks or copies already downloaded. The dashboard loads no external resources; user IDs and cost-centre owner names are not embedded in the dashboard.
-- **What cannot safely be concluded.** That the data is synthetic; that it may be redistributed; that any result describes a real company; that the extract is free of personal data.
-- **Evidence that would resolve it.** A written provenance and generation statement from the owner, a licence or an explicit statement of ownership, and an owner decision on the public repository and its history (the raw file is in public `main`).
+- **What is uncertain.** I (the project owner) created the synthetic dataset for this portfolio project. That is an ownership statement, not an externally verified fact: no generator script, random seed or creation record was kept, so nobody else can check how the data was produced ([`docs/DATA_PROVENANCE.md`](DATA_PROVENANCE.md)). The extract contains person-like cost-centre owner names and system user IDs; they are treated as fictional.
+- **Why it matters.** Every result describes the synthetic extract of the fictional NovaBridge Industries group, never a real company.
+- **Current handling.** Stated in the README and the provenance record. The repository is public and has no licence. The raw dataset is published compressed; an uncompressed copy remains in earlier git history. The dashboard embeds no user IDs or owner names and loads no external resources.
+- **What cannot safely be concluded.** That any result describes a real company; that an independent party has verified the data's origin.
+- **Evidence that would resolve it.** A recorded generator and seed (none exists).
 
 ### 2. Posted-only (R6) eligibility is provisional
 
@@ -143,13 +143,12 @@ Items 1, 14 and 17 are the ones independent validation names as conditions for p
 - **What cannot safely be concluded.** That the account classification is correct in an accounting sense, or that the 32 accounts are the complete chart.
 - **Evidence that would resolve it.** The owner's chart of accounts with section and statement per account.
 
-### 14. Windows and clean-machine reproducibility remain untested
+### 14. Windows reproducibility remains untested
 
-- **What is uncertain.** Every re-run was on a Linux container with packages already installed (numpy 2.5.3 installed against a pin of 2.4.6). No virtual-environment install from `requirements.txt` and no Windows run was done, although the owner works on Windows with VS Code. The cleaner takes about 4–5 minutes and about 1.25 GB of memory.
-- **Why it matters.** The corrected run instructions have not been shown to work on the target machine, and the pins have not been exercised in a fresh install.
-- **Current handling.** README and guides state the limit. `HOW_TO_RUN.txt` was corrected after independent validation (ISS-01, ISS-02) and regression-tested on Linux. The dashboard-build command is not in `HOW_TO_RUN.txt` (it ran with exit 0 in independent validation); adding it is a recommendation for the next phase.
-- **What cannot safely be concluded.** That the project installs and runs on Windows or on a clean machine; that `requirements.txt` is complete (Playwright and LibreOffice, used only for QA, are not listed).
-- **Evidence that would resolve it.** A fresh-venv install and a full documented run on the Windows laptop, with `pip check`.
+- **What was done.** A fresh virtual environment was built on Linux (Python 3.13) from `requirements.txt` exactly as pinned (pandas 3.0.5, numpy 2.4.6, openpyxl 3.1.5, XlsxWriter 3.2.9, duckdb 2.0.0, pytest 9.2.0); `pip check` was clean. In it the cleaner regenerated the cleaned CSV byte-identically (SHA-256 `c184b677...`), the SQL pipeline passed, and 125 tests passed with 0 failed and 0 skipped (including the LibreOffice-based Excel tests). A GitHub Actions workflow runs the fixture tests and a full-data reproduction on a clean Ubuntu runner.
+- **What is still uncertain.** No Windows run was done, although the owner works on Windows with VS Code. The cleaner takes about 4-5 minutes and about 1.25 GB of memory.
+- **What cannot safely be concluded.** That the project installs and runs on Windows; that `requirements.txt` is complete for the browser QA (Playwright and LibreOffice, used only for QA, are not listed).
+- **Evidence that would resolve it.** The documented run on the Windows laptop, with `pip check`.
 
 ### 15. Native Microsoft Excel validation remains untested
 
@@ -167,17 +166,15 @@ Items 1, 14 and 17 are the ones independent validation names as conditions for p
 - **What cannot safely be concluded.** That the dashboard works in Firefox or Safari, is accessible, or prints correctly on paper.
 - **Evidence that would resolve it.** Manual runs in Firefox and Safari, an NVDA/JAWS/VoiceOver walk-through, and a physical print.
 
-### 17. QC reports contain machine-specific paths requiring portable handling
+### 17. QC reports contained machine-specific paths (resolved)
 
-- **What is uncertain.** Nothing about the fact: `data/processed/QC_Report.txt` and `qc_summary.json` record the build environment's input and scratch paths, and they are not git-ignored (ISS-03). documentation verified that the files still contain them and did not alter them.
-- **Why it matters.** Paths disclose the build environment's layout and the files would be published with the repository. Rule 10 of the documentation brief forbids exposing machine paths.
-- **Current handling.** Not changed in documentation (the cleaned and QC files are preserved). This documentation package quotes no machine path. Related findings: `tests/dashboard_browser_qa.py` finds the palette validator through a machine-specific glob (ISS-04), and the one-off validation scripts (not published) hard-codes a scratch directory.
-- **What cannot safely be concluded.** That the repository is ready to publish.
-- **Evidence that would resolve it.** Regenerating or sanitising the QC files with a portable (repository-relative) path, adding them to `.gitignore` if appropriate, and re-checking hashes and tests. This is a publication action requiring owner approval, because it modifies the data cleaning QC outputs.
+- **What happened.** `QC_Report.txt` and `qc_summary.json` had recorded the build environment's input and scratch paths (ISS-03).
+- **Resolution.** The cleaner now records file names only; both files were regenerated by a full run (27 read-back checks, 0 failed; cleaned CSV hash unchanged) rather than edited by hand. The optional palette-validator lookup in `tests/dashboard_browser_qa.py` (ISS-04) now uses the `DATAVIZ_VALIDATOR` environment variable instead of a machine-specific path; without it that one check is skipped and reported as skipped.
+- **Residual note.** Git history still contains the earlier versions of these files.
 
 ---
 
 ## 3. Dependencies between items
 
 - Items 3, 4, 8 and 10 interact: the scale identity (3) depends on unit equality (10), gross profit (8) depends on the sign policy (4), and the sign policy also governs the 1,587 sign-conflict duplicates (6).
-- Items 1, 14 and 17 are the practical open questions. Resolving items 2–11 would change the numbers; resolving 14–17 would change only what has been verified.
+- Items 1 and 14 are the practical open questions. Resolving items 2–11 would change the numbers; resolving 14-16 would change only what has been verified.

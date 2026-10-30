@@ -953,7 +953,7 @@ async def corrections(pg, br, idx, msgs):
             if sx: await setst(dict(xf=("ent", "US01")))
             await tab(t); await pg.wait_for_timeout(120)
             r = await pg.evaluate("""()=>{
-              const parse=c=>{const m=c.match(/[\d.]+/g).map(Number);const a=m.length>3?m[3]:1;const rgb=c.startsWith('color(')?m.slice(0,3).map(x=>x*255):m.slice(0,3);return [rgb[0],rgb[1],rgb[2],a]};
+              const parse=c=>{const m=c.match(/[\\d.]+/g).map(Number);const a=m.length>3?m[3]:1;const rgb=c.startsWith('color(')?m.slice(0,3).map(x=>x*255):m.slice(0,3);return [rgb[0],rgb[1],rgb[2],a]};
               const bgOf=e=>{const L=[];while(e){const b=getComputedStyle(e).backgroundColor;if(b&&b!=='rgba(0, 0, 0, 0)'&&b!=='transparent'){const p=parse(b);L.push(p);if(p[3]>=1)break}e=e.parentElement}
                 let base=L.length&&L[L.length-1][3]>=1?L.pop():parse(getComputedStyle(document.body).backgroundColor);
                 while(L.length){const l=L.pop();base=[0,1,2].map(i=>l[i]*l[3]+base[i]*(1-l[3])).concat([1])}
@@ -988,7 +988,9 @@ async def corrections(pg, br, idx, msgs):
             rec(G, "Selected bar is outlined (2px ink) in addition to its fill (not colour alone)", cratio(selm["s"], selm["bg"]) >= 3 and float(selm["w"].replace("px", "")) >= 2, selm); await reset()
     # validator on the actual CSS palette
     import subprocess, glob
-    vp = glob.glob("/tmp/claude-0/bundled-skills/*/*/dataviz/scripts/validate_palette.js")
+    # Optional external palette validator: set DATAVIZ_VALIDATOR to the path of validate_palette.js; skipped (and reported) if unset.
+    import os
+    vp = [os.environ["DATAVIZ_VALIDATOR"]] if os.environ.get("DATAVIZ_VALIDATOR") and os.path.isfile(os.environ["DATAVIZ_VALIDATOR"]) else []
     if vp:
         for theme, mode in (("light", "light"), ("dark", "dark")):
             cols_ = await pg.evaluate("t=>{document.documentElement.setAttribute('data-theme',t);return [1,2,3,4,5,6,7,8].map(i=>getComputedStyle(document.documentElement).getPropertyValue('--s'+i).trim())}", theme)
@@ -996,7 +998,7 @@ async def corrections(pg, br, idx, msgs):
             rec(G, f"dataviz validator ({mode}) on the dashboard's actual 8 series colours {cols_}: lightness, chroma, CVD separation, normal-vision floor, contrast", "ALL CHECKS PASS" in out and "[FAIL]" not in out, out.replace("\n", " | ")[:260])
         await pg.evaluate("()=>document.documentElement.removeAttribute('data-theme')")
     else:
-        SKIPS.append((G, "dataviz validator", "validator script not found in this environment"))
+        SKIPS.append((G, "dataviz validator", "optional external validator: set DATAVIZ_VALIDATOR to run it (not run in this environment)"))
     cur = await pg.evaluate("()=>document.documentElement.getAttribute('data-theme')||'none'")
     # non-colour encodings
     await setst({}); await tab("overview"); sec = await pg.evaluate("()=>[...document.querySelectorAll('#oMonthly path[fill=none]')].map(p=>p.getAttribute('stroke-dasharray')||'solid')")

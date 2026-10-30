@@ -2,7 +2,7 @@
 
 **An end-to-end FP&A analytics portfolio project:** a messy, 152,682-row month-end ledger extract for a fictional group is cleaned without deleting a row, analysed in SQL (DuckDB), reviewed in a formula-driven Excel workbook, explored in an interactive dashboard, and independently re-checked against a pandas recalculation.
 
-> **Portfolio project on synthetic data.** NovaBridge Industries is fictional. The project owner states that the dataset is synthetic and was created for portfolio and learning purposes; that statement is **not independently verified** (no generator, seed or licence record exists). Nothing here describes the performance of a real company, and no figure should be read as one.
+> **Portfolio project on synthetic data.** NovaBridge Industries is fictional. I created this synthetic dataset myself for this portfolio project. That is my own statement: no generator script or random seed was kept, so nobody else can independently verify how it was produced. Nothing here describes the performance of a real company, and no figure should be read as one.
 >
 > **Licence: none.** No open-source licence has been selected and there is no `LICENSE` file. The code and data are visible for review; default copyright applies. This repository is not "open source".
 
@@ -133,19 +133,25 @@ Three further workbooks come from the independent validation: [`financial_reconc
 
 ![Dashboard overview](dashboard/screenshots/desktop_overview.png)
 
+![Variance tab](dashboard/screenshots/desktop_variance.png)
+
+![Dark theme](dashboard/screenshots/dark_overview.png)
+
 ## Testing
 
-Run on **30 Oct 2026** (Linux, Python 3.13.16, pandas 3.0.5, NumPy 2.5.3, DuckDB 2.0.0) after the final renaming and rebuild:
+Run on **30-31 Oct 2026** on Linux in a **fresh virtual environment built from the pinned `requirements.txt`** (Python 3.13.16, pandas 3.0.5, NumPy 2.4.6, DuckDB 2.0.0; `pip check` clean). The cleaner was re-run in full, the SQL pipeline and the whole pytest suite were run in that environment:
 
 | Check | Result |
 |---|---|
-| Cleaning script re-run on the published raw file (with `--no-excel-readback`) | 43 in-memory + 23 read-back checks, 0 failed; cleaned CSV SHA-256 identical to the reference |
+| Cleaning script re-run on the published raw file (full run; also regenerated `QC_Report.txt` and `qc_summary.json`) | 43 in-memory + 27 read-back checks, 0 failed; cleaned CSV SHA-256 identical to the reference |
 | SQL analysis pipeline on the real data | exit 0; 72 result tables rebuilt, identical to the previous build except for a few wording changes in check labels |
 | pytest (SQL pipeline and Excel workbook suites, with the cleaned CSV) | **125 passed, 0 failed, 0 skipped** |
 | Excel workbook rebuild | 3,819 formulas, 137/137 reconciliation checks pass |
 | Dashboard: headless Chromium browser test script **297 passed, 0 failed**, 1 skipped (screen-reader test, impossible here); covers filters, scenarios, themes, responsive widths, console errors. Run on the dashboard build just before the last rebuild, which changed only 3 bytes of embedded metadata |
 
 **Historical (not re-run as a whole):** an independent pandas reference compared with SQL, Excel and the dashboard: **780 checks executed: 774 PASS, 1 FAIL, 1 BLOCKED, 4 NOT TESTED, plus 43 INFO**. The single FAIL was a defect in the original run instructions (corrected and regression-tested), not in the data or calculations. Issues found are in [`excel/issue_log.xlsx`](excel/issue_log.xlsx). The one-off validation scripts are not part of this repository.
+
+**Continuous integration:** [`.github/workflows/ci.yml`](.github/workflows/ci.yml) runs on every push and pull request: (1) a fast job with the 42 fixture tests, which need no data; (2) a full-data job that decompresses the raw file, regenerates the cleaned CSV, runs the SQL pipeline and the SQL/pipeline pytest suites. It does **not** run the Excel/LibreOffice tests or the dashboard browser tests. Its result is shown on the Actions tab; the checks above were run by hand, not by CI.
 
 **Not tested:** Windows, other Python versions, native Microsoft Excel, Firefox, Safari, screen readers, a physical printer. Tests need the cleaned CSV, which must be regenerated first (see [Run it yourself](#run-it-yourself)).
 
@@ -172,7 +178,7 @@ python src/dashboard_builder.py                            # rebuild the dashboa
 
 ## Assumptions, limitations and open issues
 
-* **Provenance:** synthetic status and the dataset's origin are owner-stated, not verified; no licence for the data exists.
+* **Provenance:** the dataset was created by me and is synthetic (owner statement, not independently verifiable); no licence applies to the data or the code.
 * **Every headline figure is conditional** on provisional rules: the Posted-only journal-status rule, per-row scale restoration, FX direction, the variance-% convention and per-line summing of budget, forecast and prior-year amounts. The account **sign convention**, **duplicate handling** and **consolidation** remain unresolved.
 * **4,996 non-Posted lines appear in no dashboard view** (they fail the amount or scale gates); they are counted in the exclusion waterfall and the workbook's Data Quality sheet.
 * The account-to-section mapping has not been checked against an authoritative chart of accounts.

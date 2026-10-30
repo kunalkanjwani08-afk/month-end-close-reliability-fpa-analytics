@@ -2,9 +2,9 @@
 QC REPORT - fpa_monthly_close cleaning
 ====================================================================================================
 script version      : 1.0.0
-run timestamp       : 2026-10-28 11:55:08
+run timestamp       : 2026-10-30 19:55:13
 python / pandas / numpy : 3.13.16 / 3.0.5 / 2.5.3
-input file          : /mnt/user-data/uploads/Downloads/fpa_monthly_close_raw_messy.csv
+input file          : fpa_monthly_close_raw_messy.csv
 input bytes         : 51,938,535 (expected 51,938,535)
 input sha256        : a0e6eddde25280aa27a60c5955743d3243b14138d876eedac0547e24a1cc6fff
 hash matches expected: True
@@ -14,9 +14,9 @@ columns raw / cleaned CSV / Excel sheet: 43 / 192 / 77
 settings            : APPLY_SCALE_RESTORATION=True, REMOVE_FIELD_MATCH_DUPLICATES=False, eligible statuses=('Posted',), z bands divided<=-5.0 / undivided>=-3.0
 
 OUTPUT FILES (size and SHA-256 of the exact files that were re-read below)
-  csv     : /tmp/claude-0/-home-claude/0e9b127f-3684-54d9-aef1-b8f704472daf/scratchpad/build/out3/fpa_monthly_close_cleaned.csv  (174,545,248 bytes)  sha256=c184b677bacc6f23086e3b5eedd71836643cb75064e428a1ebfee4c075fa9b47
-  audit   : /tmp/claude-0/-home-claude/0e9b127f-3684-54d9-aef1-b8f704472daf/scratchpad/build/out3/fpa_monthly_close_cleaned_cell_audit.csv  (17,117,029 bytes)  sha256=280bf9a15951211cc557bc2501077fcae55f54a53fafb8143e6e5a916b132da0
-  xlsx    : /tmp/claude-0/-home-claude/0e9b127f-3684-54d9-aef1-b8f704472daf/scratchpad/build/out3/fpa_monthly_close_cleaned.xlsx  (67,381,749 bytes)  sha256=270edc6b33ae74c46513b4529f6a6e314854c28a898c81f0877c0ac311bb3db6
+  csv     : fpa_monthly_close_cleaned.csv  (174,545,248 bytes)  sha256=c184b677bacc6f23086e3b5eedd71836643cb75064e428a1ebfee4c075fa9b47
+  audit   : fpa_monthly_close_cleaned_cell_audit.csv  (17,117,029 bytes)  sha256=280bf9a15951211cc557bc2501077fcae55f54a53fafb8143e6e5a916b132da0
+  xlsx    : fpa_monthly_close_cleaned.xlsx  (67,381,732 bytes)  sha256=fd921b2c29929671aa75673dd6e8ca079a829ff49699501c4ac79a3468e13d6c
   CANONICAL cleaned dataset: the 'csv' file above (192 columns, 152,682 rows). The xlsx Cleaned_Data sheet is a 77-column review copy.
   Reported totals are PROVISIONAL (Posted-only rule R6 is proposed, not confirmed).
 
@@ -194,7 +194,7 @@ OPEN ITEMS / DECISIONS FOR THE OWNER
 - Journal-status eligibility (R6): PROVISIONAL: only 'Posted' enters totals (proposed rule; every ELIGIBLE total in this workbook is provisional). | Only 65,381 of 152,682 rows are Posted; 21,742 are blank. The status mix is near-uniform across entities (looks like noise). | NEXT: Owner to confirm what blank / Pending / Parked mean.
 - FX direction and rate quality (R8): USD = local / rate fits the data; rate 1.0 on non-USD rows and rate 0 do not. | Local/rate reconciles to actual USD for 98.7% of 125,397 testable rows (sign-insensitive); all 1,645 failures have rate exactly 1.0 on a non-USD currency. 2,510 rows have rate 0. USD-currency rows: 22,567 of 23,577 with a usable rate lie outside 1.000 +/- 0.001 (none is exactly 1.0); separately, the AMOUNT test (F12) finds |local| != |actual| on 21,106 USD rows. The counts are different populations: see FX_Evidence. | NEXT: Owner to confirm the rate source and why USD rows are not 1.0.
 - Account sign convention (R9): Unresolved. No sign was changed. | 33,080 rows have exactly one column with an opposite sign; 19,614 rows are negative in every column (plausible credits). | NEXT: Owner to define the sign convention per account group.
-- Entities: Junk / unresolved entity rows are excluded, not deleted. | Junk by name 173, by code 144, union 204; 16 rows have neither a code nor a name. project scoping docs quote 173 (names only) - docs should be updated. | NEXT: Owner to confirm 'Do not use' / 'xxx' are non-reporting.
+- Entities: Junk / unresolved entity rows are excluded, not deleted. | Junk by name 173, by code 144, union 204; 16 rows have neither a code nor a name. Project scoping docs quote 173 (names only) - docs should be updated. | NEXT: Owner to confirm 'Do not use' / 'xxx' are non-reporting.
 - Missing with no source: Left blank on purpose. | posting_date blank 7,681; cost centre blank 6,828; user_id/approval blank ~4-5% each. | NEXT: Nothing to fix in cleaning; request a better extract if these matter.
 - UOM 'NOS': Kept separate from 'EA'. | Number-of-pieces abbreviation is probably equal to EA but is not proven. | NEXT: Owner to confirm.
 - Period convention: P01 = January, fiscal year = calendar year. | Supported: every non-slash posting date lies in the month implied by this reading (8 period formats, 0 exceptions). | NEXT: Owner to confirm.
