@@ -40,6 +40,15 @@ jobs:
       - name: Regenerate the cleaned dataset (cleaner checks the raw file's SHA-256 first)
         run: python src/clean_fpa_monthly_close.py --output-dir data/processed --no-excel-readback
       - name: SQL analysis pipeline (fails unless every validation check passes)
-        run: python src/sql_analysis_pipeline.py
+        run: |
+          set +e
+          python src/sql_analysis_pipeline.py 2> sql_stderr.txt
+          rc=$?
+          cat sql_stderr.txt >&2
+          if [ $rc -ne 0 ]; then
+            # surface the failing validation rows as annotations so they are visible without opening the log
+            head -n 25 sql_stderr.txt | while IFS= read -r line; do echo "::error::${line}"; done
+          fi
+          exit $rc
       - name: Full-data tests (all except the Excel workbook tests)
         run: python -m pytest tests -q --ignore=tests/test_excel_workbook.py --ignore=tests/dashboard_browser_qa.py --ignore=tests/dashboard_negative_controls.py
