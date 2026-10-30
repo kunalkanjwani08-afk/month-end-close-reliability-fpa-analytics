@@ -39,16 +39,18 @@ jobs:
         run: gunzip -k data/raw/fpa_monthly_close_raw_messy.csv.gz
       - name: Regenerate the cleaned dataset (cleaner checks the raw file's SHA-256 first)
         run: python src/clean_fpa_monthly_close.py --output-dir data/processed --no-excel-readback
-      - name: TEMP diagnostic - per-column hashes of the regenerated CSV
+      - name: TEMP diagnostic - last 40 columns
         if: always()
         run: |
           python - <<'PY'
-          import hashlib, platform, sys, subprocess, pandas as pd, numpy as np
+          import hashlib, pandas as pd
           df = pd.read_csv("data/processed/fpa_monthly_close_cleaned.csv", dtype=str, keep_default_na=False)
-          h = {c: hashlib.sha256("\x1f".join(df[c].tolist()).encode()).hexdigest()[:8] for c in df.columns}
-          cpu = subprocess.run("lscpu | grep -i 'model name'", shell=True, capture_output=True, text=True).stdout.strip()
-          print("::error::ENV " + sys.version.split()[0] + " numpy " + np.__version__ + " pandas " + pd.__version__ + " " + platform.platform() + " " + cpu + " rows " + str(len(df)))
-          print("::error::COLS " + ",".join(f"{c}={v}" for c, v in h.items()))
+          cols = list(df.columns)[-40:]
+          out = []
+          for c in cols:
+              nz = int((df[c] != "").sum()); ones = int((df[c] == "1").sum())
+              out.append(c + "=" + hashlib.sha256("\x1f".join(df[c].tolist()).encode()).hexdigest()[:8] + ":" + str(nz) + ":" + str(ones))
+          print("::error::TAIL " + ",".join(out))
           PY
       - name: SQL analysis pipeline (fails unless every validation check passes)
         run: |
