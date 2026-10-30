@@ -1,0 +1,8 @@
+,amount_local,actual_usd,budget_usd,forecast_usd,prior_year_usd
+missing,9172,9259,8915,9200,9069
+us,19436,18451,18704,18611,18262
+plain,105724,106776,107134,106963,107474
+dec_comma,1389,1919,1832,1817,1974
+comma_thousands_ambiguous,9128,9317,9123,9260,9058
+eu,7238,6936,6948,6801,6826
+comma_thousands,595,24,26,30,19

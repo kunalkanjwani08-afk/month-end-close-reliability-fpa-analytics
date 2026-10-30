@@ -1,0 +1,9 @@
+{
+ "cmd": [
+  "python3",
+  "tests/phase6_dashboard_qa.py"
+ ],
+ "exit": 0,
+ "seconds": 165.9,
+ "max_rss_mb": 818.3
+}

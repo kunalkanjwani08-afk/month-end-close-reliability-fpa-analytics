@@ -1,0 +1,8 @@
+DETECTED | M1 cross-filter guard removed (xfOK always true, bars never disabled) | after US01 -> AE01 click: chart selection={'dim': 'ent', 'val': 0, 'label': 'Entity = AE01'}, lines in scope=0
+DETECTED | M2 static header subtitle (scope text never updated) | header after selecting 'As reported': ''
+DETECTED | M3 status table ignores the GL filter (old cube behaviour) | Pending lines before/after a GL filter: 19777 -> 19777 (unchanged = GL filter ignored)
+DETECTED | M4 old light palette (#1baf7a, #eda100, #e87ba4) | series 3-5 contrast vs card: [('#1baf7a', 2.74), ('#eda100', 2.11), ('#e87ba4', 2.62)]
+DETECTED | M5 bridge sign error (COGS step added instead of deducted) | Revenue + steps - Result = 185,616,036 (should be 0)
+DETECTED | M6 print leaves the header basis open (toggle during print not ignored) | header basis open after a print cycle and re-render: True
+
+6/6 re-introduced defects detected

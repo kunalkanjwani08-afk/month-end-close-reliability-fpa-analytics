@@ -1,0 +1,9 @@
+{
+ "cmd": [
+  "python3",
+  "tests/phase6_negative_controls.py"
+ ],
+ "exit": 0,
+ "seconds": 6.9,
+ "max_rss_mb": 121.0
+}

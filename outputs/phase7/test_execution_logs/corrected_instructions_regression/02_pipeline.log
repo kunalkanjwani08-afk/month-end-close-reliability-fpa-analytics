@@ -1,0 +1,21 @@
+[1/4] input verified: /tmp/claude-0/-home-claude/0e9b127f-3684-54d9-aef1-b8f704472daf/scratchpad/p7_repo_copy2/data/processed/fpa_monthly_close_cleaned.csv
+      sha256=c184b677bacc6f23086e3b5eedd71836643cb75064e428a1ebfee4c075fa9b47
+      174,545,248 bytes, 192 columns
+[2/4] database built (9s): stg_close_raw + fact_close loaded
+      01_dimensions_and_views.sql: 12 statements, 0.05s
+      02_grain_and_overview.sql: 9 statements, 0.31s
+      03_load_validation.sql: 2 statements, 0.6s
+      04_budget_variance.sql: 13 statements, 0.23s
+      05_forecast_error.sql: 9 statements, 0.14s
+      06_prior_year.sql: 6 statements, 0.14s
+      07_gross_profit.sql: 9 statements, 0.11s
+      08_cost_structure.sql: 7 statements, 0.14s
+      09_trend_volatility.sql: 6 statements, 0.07s
+      10_balance_sheet.sql: 6 statements, 0.05s
+      11_dq_exposure_scenarios.sql: 11 statements, 0.94s
+      99_analytical_validation.sql: 1 statements, 0.17s
+[3/4] SQL complete
+      independent pandas cross-check: 124 figures recomputed
+[4/4] validated and promoted 72 output tables to /tmp/claude-0/-home-claude/0e9b127f-3684-54d9-aef1-b8f704472daf/scratchpad/p7_repo_copy2/outputs/phase4
+database: /tmp/claude-0/-home-claude/0e9b127f-3684-54d9-aef1-b8f704472daf/scratchpad/p7_repo_copy2/data/processed/phase4_fpa.duckdb
+FINISHED in 17s

@@ -1,0 +1,10 @@
+{
+ "cmd": [
+  "python3",
+  "src/phase5_excel.py",
+  "--qa-report"
+ ],
+ "exit": 0,
+ "seconds": 19.1,
+ "max_rss_mb": 353.5
+}

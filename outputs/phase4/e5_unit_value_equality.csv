@@ -1,0 +1,6 @@
+product_family,sales_rows,materials_rows,median_sales_value_per_unit,median_materials_value_per_unit,materials_vs_sales_unit_value_diff
+Diagnostics,2093,1947,639.9999538338665,640.0,7.213458874666401e-08
+Home Comfort,2060,2035,180.0,180.0,0.0
+Motors,2036,2074,260.0,260.0,0.0
+Pumps & Valves,1953,2051,420.0,419.99997849996396,-5.119056201152716e-08
+Spare Kits,2110,2025,45.0,45.0,0.0

@@ -1,0 +1,23 @@
+metric,value,note
+cells (entity x period x GL) with >=1 eligible row,4907.0,""
+cells with >1 eligible row,4210.0,""
+distinct document_no among eligible P&L rows,57749.0,document_no is not a unique line key (R5)
+eligible P&L rows,58340.0,""
+multi-row cells: actual - ALL_MISSING,0.0,""
+multi-row cells: actual - ALL_POPULATED_EQUAL,9.0,identical values on every line would instead suggest a repeated cell-level figure
+multi-row cells: actual - MULTIPLE_POPULATED_DIFFERENT,4201.0,"lines in the same cell carry different values, so values are per-line amounts and are summed as separate amounts"
+multi-row cells: actual - ONE_VALUE_PLUS_MISSING,0.0,""
+multi-row cells: budget - ALL_MISSING,6.0,""
+multi-row cells: budget - ALL_POPULATED_EQUAL,3.0,identical values on every line would instead suggest a repeated cell-level figure
+multi-row cells: budget - MULTIPLE_POPULATED_DIFFERENT,4121.0,"lines in the same cell carry different values, so values are per-line amounts and are summed as separate amounts"
+multi-row cells: budget - ONE_VALUE_PLUS_MISSING,80.0,""
+multi-row cells: forecast - ALL_MISSING,4.0,""
+multi-row cells: forecast - ALL_POPULATED_EQUAL,9.0,identical values on every line would instead suggest a repeated cell-level figure
+multi-row cells: forecast - MULTIPLE_POPULATED_DIFFERENT,4104.0,"lines in the same cell carry different values, so values are per-line amounts and are summed as separate amounts"
+multi-row cells: forecast - ONE_VALUE_PLUS_MISSING,93.0,""
+multi-row cells: prior year - ALL_MISSING,4.0,""
+multi-row cells: prior year - ALL_POPULATED_EQUAL,7.0,identical values on every line would instead suggest a repeated cell-level figure
+multi-row cells: prior year - MULTIPLE_POPULATED_DIFFERENT,4118.0,"lines in the same cell carry different values, so values are per-line amounts and are summed as separate amounts"
+multi-row cells: prior year - ONE_VALUE_PLUS_MISSING,81.0,""
+non-posting (TOTAL/Subtotal/CHECK) rows still in the canonical CSV,350.0,"kept for traceability, excluded from every population"
+non-posting rows inside any analytical population,0.0,must be 0

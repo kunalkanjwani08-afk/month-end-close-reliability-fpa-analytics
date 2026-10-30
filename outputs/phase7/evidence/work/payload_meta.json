@@ -1,0 +1,31 @@
+{
+ "meta": {
+  "csv_sha256": "c184b677bacc6f23086e3b5eedd71836643cb75064e428a1ebfee4c075fa9b47",
+  "raw_sha256": "a0e6eddde25280aa27a60c5955743d3243b14138d876eedac0547e24a1cc6fff",
+  "db_sha256": "00e7437697c8e11baab5d2cff7036d6dda3d251a139774adee0a2dfe92c413e6",
+  "xlsx_sha256": "71e23dca9e0bbce3295223188c296cd3bd5ff51759825487bae049705375f561",
+  "rows_total_source": 152682,
+  "rows_pl_eligible": 58340,
+  "rows_budget": 55043,
+  "rows_any_status": 136330,
+  "rows_nonposted": 77990,
+  "p5_manifest_keys": [
+   "formula_cells",
+   "generated_at_utc",
+   "generator",
+   "generator_sha256",
+   "generator_warnings",
+   "inputs",
+   "notes",
+   "qa",
+   "reconciliation",
+   "sheets",
+   "version",
+   "workbook",
+   "workbook_bytes",
+   "workbook_sha256"
+  ]
+ },
+ "n_R": 58340,
+ "n_X": 77990
+}

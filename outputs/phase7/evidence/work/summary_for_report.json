@@ -1,0 +1,106 @@
+{
+ "summary": {
+  "generated": "2026-10-30T11:58:35",
+  "counts": {
+   "PASS": 774,
+   "FAIL": 1,
+   "BLOCKED": 1,
+   "NOT TESTED": 4,
+   "INFO": 43
+  },
+  "by_area": {
+   "Data lineage & record reconciliation": {
+    "PASS": 101,
+    "INFO": 14
+   },
+   "Independent financial recomputation vs SQL": {
+    "PASS": 85,
+    "INFO": 2
+   },
+   "SQL layer (canonical DuckDB, read-only)": {
+    "PASS": 33,
+    "INFO": 1
+   },
+   "Phase 5 Excel workbook": {
+    "PASS": 31,
+    "INFO": 3
+   },
+   "Phase 6 dashboard (browser)": {
+    "INFO": 2,
+    "PASS": 471,
+    "NOT TESTED": 3
+   },
+   "Project assumptions & disclosure": {
+    "PASS": 15,
+    "INFO": 2
+   },
+   "Python/SQL/Excel re-runs & reproducibility": {
+    "PASS": 31,
+    "INFO": 4,
+    "FAIL": 1,
+    "NOT TESTED": 1
+   },
+   "Security, privacy & publication": {
+    "PASS": 7,
+    "INFO": 15,
+    "BLOCKED": 1
+   }
+  },
+  "issues_by_severity": {
+   "Medium": 2,
+   "Low": 5,
+   "Accepted limitation (publication blocker)": 1,
+   "Accepted limitation": 10
+  },
+  "environment": {
+   "python": "3.13.16",
+   "platform": "Linux-6.18.44-fc-v185-x86_64-with-glibc2.39",
+   "pandas": "3.0.5",
+   "numpy": "2.5.3",
+   "duckdb": "2.0.0",
+   "openpyxl": "3.1.5",
+   "pytest": "9.2.0",
+   "playwright": "1.56.0",
+   "chromium": "141.0.7390.37",
+   "libreoffice": "LibreOffice 24.2.7.2 420(Build:2)"
+  },
+  "authoritative_inputs": [
+   {
+    "role": "raw CSV",
+    "path": "data/raw/fpa_monthly_close_raw_messy.csv",
+    "bytes": 51938535,
+    "sha256": "a0e6eddde25280aa27a60c5955743d3243b14138d876eedac0547e24a1cc6fff"
+   },
+   {
+    "role": "cleaned CSV (canonical)",
+    "path": "data/processed/fpa_monthly_close_cleaned.csv",
+    "bytes": 174545248,
+    "sha256": "c184b677bacc6f23086e3b5eedd71836643cb75064e428a1ebfee4c075fa9b47"
+   },
+   {
+    "role": "DuckDB",
+    "path": "data/processed/phase4_fpa.duckdb",
+    "bytes": 86257664,
+    "sha256": "00e7437697c8e11baab5d2cff7036d6dda3d251a139774adee0a2dfe92c413e6"
+   },
+   {
+    "role": "Phase 5 workbook",
+    "path": "outputs/phase5/fpa_month_end_close_analysis.xlsx",
+    "bytes": 272343,
+    "sha256": "71e23dca9e0bbce3295223188c296cd3bd5ff51759825487bae049705375f561"
+   },
+   {
+    "role": "Phase 6 dashboard",
+    "path": "outputs/phase6/fpa_financial_analytics_dashboard.html",
+    "bytes": 7317802,
+    "sha256": "43d2505abe218ca56fdab57fcf64722e1f6f10ccdf3263b89c4f8691d584efc0"
+   },
+   {
+    "role": "Phase 2 review workbook (owner's Downloads / master zip)",
+    "path": "fpa_monthly_close_cleaned.xlsx",
+    "bytes": 67381749,
+    "sha256": "270edc6b33ae74c46513b4529f6a6e314854c28a898c81f0877c0ac311bb3db6"
+   }
+  ]
+ }
+}

@@ -1,0 +1,53 @@
+PHASE 4 / PHASE 5 - HOW TO RUN (Windows / VS Code terminal; Linux/macOS commands in brackets)
+
+PHASE 5 PACKAGE (Phase5_Package zip) CONTAINS ONLY:
+     outputs\phase5\fpa_month_end_close_analysis.xlsx, MANIFEST.json, PHASE5_QA_REPORT.md
+     src\phase5_excel.py, tests\test_phase5_excel.py, tests\conftest.py
+     README.md, HOW_TO_RUN.txt, requirements.txt
+     docs\PHASE5_REVIEW_RESPONSE.md, docs\FINANCIAL_METRICS.md
+     src\phase4_report.py, docs\PHASE4_INSIGHT_REGISTER.md, docs\PHASE4_ANALYSIS_REPORT.md   (Phase 4 files changed in the Phase 5 review)
+   It is NOT self-contained. To REBUILD or re-test the workbook you need the full project repository, which supplies:
+     src\clean_fpa_monthly_close.py                      (Phase 3 cleaner)
+     src\phase4_pipeline.py, src\phase4_crosscheck.py    (Phase 4 pipeline; phase5_excel.py imports phase4_pipeline)
+     sql\phase4\*.sql                                   (Phase 4 SQL)
+     tests\test_phase4.py, tests\test_phase4_units.py    (Phase 4 tests)
+     outputs\phase4\ (CSV exports + MANIFEST.json)       (verified by the Phase 5 build)
+     data\processed\phase4_fpa.duckdb                    (database, local only, git-ignored)
+     data\processed\fpa_monthly_close_cleaned.csv        (canonical cleaned CSV, 174 MB, local only, git-ignored)
+     data\raw\fpa_monthly_close_raw_messy.csv            (raw extract; never edited)
+   Copy the package files over the repository (same relative paths) before running steps 1-5. The workbook itself opens without any of these.
+
+0. Folder layout (unzip so that these exist):
+     data\raw\fpa_monthly_close_raw_messy.csv                (raw, never edited)
+     data\processed\fpa_monthly_close_cleaned.csv             (canonical cleaned file, 174 MB, NOT in the zip)
+   If the cleaned file is missing, create it with:  python src\clean_fpa_monthly_close.py
+   The pipeline checks SHA-256 c184b677bacc6f23086e3b5eedd71836643cb75064e428a1ebfee4c075fa9b47
+   and refuses to run on any other file.
+
+1. Environment (Python 3.11 or newer):
+     python -m venv .venv
+     .venv\Scripts\activate            [source .venv/bin/activate]
+     pip install -r requirements.txt
+
+2. Build, validate and export (about 20-30 seconds):
+     python src\phase4_pipeline.py
+   Exit code 0 = all 55+24+86+124 checks passed and outputs\phase4\*.csv + MANIFEST.json were promoted.
+   Exit code 1 = missing/invalid input.  Exit code 2 = integrity/validation failure.
+   On failure nothing accepted is overwritten; look in outputs\phase4_failed_run\ and data\processed\phase4_fpa.duckdb.failed.
+
+3. Regenerate the two documents from the validated database:
+     python src\phase4_report.py
+
+4. Tests (about 80 seconds with the cleaned CSV, 2 seconds without):
+     python -m pytest tests -q
+   Without the cleaned CSV only 42 fixture tests run and the run is reported INCOMPLETE (non-zero exit).
+
+5. Phase 5 Excel workbook (a few seconds; needs the database from step 2 and the documents from step 3):
+     python src\phase5_excel.py
+     python -m pytest tests\test_phase5_excel.py -q
+     python src\phase5_excel.py --qa-report
+   Output: outputs\phase5\fpa_month_end_close_analysis.xlsx, MANIFEST.json, PHASE5_QA_REPORT.md.
+   Exit code 1 = missing input, 2 = Phase 4 hand-off or reconciliation failed. LibreOffice (soffice) is needed for 2 tests; without it they are skipped and reported INCOMPLETE. The workbook has not been opened in Microsoft Excel.
+   Any edit to src\phase5_excel.py or to the Phase 4 documents requires re-running step 5 (the manifest records the generator hash).
+
+Nothing here commits, pushes or publishes anything. Not yet run on Windows (built and tested on Linux).

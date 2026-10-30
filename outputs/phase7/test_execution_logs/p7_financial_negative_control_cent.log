@@ -1,0 +1,22 @@
+[financial_sql_mutant_cent] {'PASS': 64, 'FAIL': 21, 'INFO': 2}
+   FAIL F_A1.actual_usd P&L by period x section (a1): actual_usd (all 252 rows) | exp 0 | act 1 | max |SQL - reference| = 0.02; null-pattern mismatches 0
+   FAIL F_A1.abs_actual_usd P&L by period x section (a1): abs_actual_usd (all 252 rows) | exp 0 | act 1 | max |SQL - reference| = 0.02; null-pattern mismatches 0
+   FAIL F_A2.actual_usd P&L by entity x section (a2): actual_usd (all 42 rows) | exp 0 | act 1 | max |SQL - reference| = 0.02; null-pattern mismatches 0
+   FAIL F_A2.abs_actual_usd P&L by entity x section (a2): abs_actual_usd (all 42 rows) | exp 0 | act 1 | max |SQL - reference| = 0.02; null-pattern mismatches 0
+   FAIL F_A3.actual_usd P&L by division x section (a3): actual_usd (all 35 rows) | exp 0 | act 1 | max |SQL - reference| = 0.02; null-pattern mismatches 0
+   FAIL F_A3.abs_actual_usd P&L by division x section (a3): abs_actual_usd (all 35 rows) | exp 0 | act 1 | max |SQL - reference| = 0.02; null-pattern mismatches 0
+   FAIL F_A4.actual_usd P&L by GL account (a4): actual_usd (all 24 rows) | exp 0 | act 1 | max |SQL - reference| = 0.02; null-pattern mismatches 0
+   FAIL F_A4.abs_actual_usd P&L by GL account (a4): abs_actual_usd (all 24 rows) | exp 0 | act 1 | max |SQL - reference| = 0.02; null-pattern mismatches 0
+   FAIL F_B1.actual_usd Budget variance by section, 4 sign scenarios (b1): actual_usd (all 26 rows) | exp 0 | act 2 | max |SQL - reference| = 0.02; null-pattern mismatches 0
+   FAIL F_B1.net_variance_usd Budget variance by section, 4 sign scenarios (b1): net_variance_usd (all 26 rows) | exp 0 | act 2 | max |SQL - reference| = 0.02; null-pattern mismatches 0
+   FAIL F_B1.gross_cell_variance_usd Budget variance by section, 4 sign scenarios (b1): gross_cell_variance_usd (all 26 rows) | exp 0 | act 2 | max |SQL - reference| = 0.02; null-pattern mismatches 0
+   FAIL F_B3.actual_usd Budget variance by division x section (b3, amounts): actual_usd (all 70 rows) | exp 0 | act 2 | max |SQL - reference| = 0.02; null-pattern mismatches 0
+   FAIL F_B3.variance_usd Budget variance by division x section (b3, amounts): variance_usd (all 70 rows) | exp 0 | act 2 | max |SQL - reference| = 0.02; null-pattern mismatches 0
+   FAIL F_C1.actual_usd Forecast error by section (c1): actual_usd (all 26 rows) | exp 0 | act 2 | max |SQL - reference| = 0.02; null-pattern mismatches 0
+   FAIL F_C1.net_error_usd Forecast error by section (c1): net_error_usd (all 26 rows) | exp 0 | act 2 | max |SQL - reference| = 0.02; null-pattern mismatches 0
+   FAIL F_C1.abs_error_usd Forecast error by section (c1): abs_error_usd (all 26 rows) | exp 0 | act 2 | max |SQL - reference| = 0.02; null-pattern mismatches 0
+   FAIL F_C1.abs_actual_usd Forecast error by section (c1): abs_actual_usd (all 26 rows) | exp 0 | act 2 | max |SQL - reference| = 0.02; null-pattern mismatches 0
+   FAIL F_D1.actual_usd Actual vs prior-year column by year x section (d1): actual_usd (all 42 rows) | exp 0 | act 2 | max |SQL - reference| = 0.02; null-pattern mismatches 0
+   FAIL F_D1.change_usd Actual vs prior-year column by year x section (d1): change_usd (all 42 rows) | exp 0 | act 2 | max |SQL - reference| = 0.02; null-pattern mismatches 0
+   FAIL F_E1.revenue_usd Gross profit S1/S2/S3 x rowset x year (e1): revenue_usd (all 24 rows) | exp 0 | act 12 | max |SQL - reference| = 0.02; null-pattern mismatches 0
+   FAIL F_E1.gross_profit_usd Gross profit S1/S2/S3 x rowset x year (e1): gross_profit_usd (all 24 rows) | exp 0 | act 12 | max |SQL - reference| = 0.02; null-pattern mismatches 0

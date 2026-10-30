@@ -1,0 +1,8 @@
+metric,reason_not_computed
+Balance movement (change in receivables etc.),"Needs a consistent opening/closing definition and one line per cell; most populated cells have several lines whose sizes differ widely (H1, H3)."
+Cash conversion cycle,"Depends on DSO, DPO and inventory days; none can be supported."
+DPO,"Needs closing trade payables (2100) and purchases/COGS on a stated basis. 2100 (and 1200) each show a negative period total and month-on-month swings far beyond a plausible balance (H5), so the balance is not reliable."
+DSO,Needs closing trade receivables (1200) and credit sales for the same period plus an averaging convention. Credit sales are not separable from cash sales in the extract.
+Intercompany balance reconciliation,Counterparty entity is not in the extract; elimination status is mostly blank (R12 unresolved).
+Inventory turnover,Needs average inventory (1300) from opening and closing balances. Opening/closing status of lines is unknown.
+Working capital,"Needs reliable closing balances for receivables, inventory, payables and an asset/liability sign mapping. Lines per cell are not additive snapshots (H3) and sign convention is unresolved."

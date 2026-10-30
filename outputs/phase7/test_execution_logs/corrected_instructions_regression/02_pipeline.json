@@ -1,0 +1,9 @@
+{
+ "cmd": [
+  "python3",
+  "src/phase4_pipeline.py"
+ ],
+ "exit": 0,
+ "seconds": 17.0,
+ "max_rss_mb": 924.1
+}
