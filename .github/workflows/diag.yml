@@ -1,0 +1,40 @@
+name: diag-csv
+on:
+  push:
+    branches: [diag-csv]
+jobs:
+  diag:
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    strategy:
+      fail-fast: false
+      matrix:
+        n: [1, 2, 3, 4, 5, 6]
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: {python-version: "3.13", cache: pip}
+      - run: pip install -r requirements.txt
+      - run: gunzip -k data/raw/fpa_monthly_close_raw_messy.csv.gz
+      - run: python src/clean_fpa_monthly_close.py --output-dir data/processed --no-excel-readback
+      - name: Line-level comparison with reference
+        run: |
+          python - <<'PY'
+          import hashlib, subprocess, io, contextlib, numpy as np
+          b = open("data/processed/fpa_monthly_close_cleaned.csv", "rb").read()
+          sha = hashlib.sha256(b).hexdigest()
+          lines = b.split(b"\n")
+          if lines[-1] == b"": lines = lines[:-1]
+          ref = open(".diag_ref.bin", "rb").read()
+          cpu = subprocess.run("lscpu | grep -i 'model name'", shell=True, capture_output=True, text=True).stdout.strip()
+          buf = io.StringIO()
+          with contextlib.redirect_stdout(buf):
+              np.show_runtime()
+          simd = " | ".join(l.strip() for l in buf.getvalue().splitlines() if "found" in l.lower() or "not_found" in l.lower() or "baseline" in l.lower())
+          print("::notice::MATRIX " + "${{ matrix.n }}" + " sha=" + sha[:12] + " " + cpu + " lines=" + str(len(lines)) + " reflines=" + str(len(ref)//6))
+          print("::notice::SIMD " + simd[:900])
+          diff = [i for i, l in enumerate(lines) if i*6+6 > len(ref) or hashlib.md5(l).digest()[:6] != ref[i*6:i*6+6]]
+          print("::warning::DIFFLINES count=" + str(len(diff)) + " first=" + ",".join(map(str, diff[:30])))
+          for i in diff[:4]:
+              print("::warning::LINE " + str(i) + " " + lines[i].decode("utf-8", "replace"))
+          PY
