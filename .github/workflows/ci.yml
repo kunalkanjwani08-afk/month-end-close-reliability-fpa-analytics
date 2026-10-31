@@ -1,56 +1,105 @@
 name: CI
 
+# What runs automatically (every push and pull request to main):
+#   1. fixture-tests          compileall, dependency check and the fixture tests that need no data (about 1 minute).
+#   2. full-data-reproduction raw .csv.gz -> cleaner -> SQL pipeline (289 validation rows) -> full-data SQL/cross-check tests.
+# What runs only when started by hand ("Run workflow" on the Actions tab, workflow_dispatch):
+#   the extended steps at the end of job 2: the Excel workbook build and its tests (needs LibreOffice) and the dashboard
+#   build with its Playwright/Chromium browser tests and negative controls (about 10 extra minutes).
+# NOT covered by any automated run: Windows, macOS, native Microsoft Excel, Firefox, Safari, screen readers.
+
 on:
   push:
     branches: [main]
   pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+env:
+  PYTHON_VERSION: "3.13.16"   # the version the published results were produced on
+  PIP_DISABLE_PIP_VERSION_CHECK: "1"
 
 jobs:
-  # Fast checks that need no data: syntax, imports and the 42 fixture tests.
   fixture-tests:
     runs-on: ubuntu-latest
+    timeout-minutes: 10
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-python@v5
+      # Actions are pinned to full commit SHAs (verified against the upstream repositories); the comment names the release.
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
-          python-version: "3.13"
+          persist-credentials: false
+      - uses: actions/setup-python@6d4fd22b20465ccc0f7354476588e8df7c9ca0e0 # v7.1.0
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
           cache: pip
+          cache-dependency-path: requirements.txt
       - run: pip install -r requirements.txt
+      - run: pip check
       - run: python -m compileall -q src tests
-      - name: Fixture tests (no real data)
+      - name: Fixture tests (no real data needed)
         run: python -m pytest tests/test_sql_pipeline_units.py -q
         env:
-          ALLOW_SKIPPED_FULLDATA_TESTS: "1"
+          ALLOW_SKIPPED_FULLDATA_TESTS: "1"   # the full-data tests are deliberately not part of this job
 
-  # End-to-end: regenerate the cleaned data from the raw file, run the SQL pipeline and the full-data tests.
-  # The Excel workbook tests need LibreOffice and are not part of this job.
   full-data-reproduction:
     runs-on: ubuntu-latest
     needs: fixture-tests
-    timeout-minutes: 30
+    timeout-minutes: 45
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-python@v5
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
-          python-version: "3.13"
+          persist-credentials: false
+      - uses: actions/setup-python@6d4fd22b20465ccc0f7354476588e8df7c9ca0e0 # v7.1.0
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
           cache: pip
+          cache-dependency-path: requirements.txt
       - run: pip install -r requirements.txt
       - name: Decompress the raw dataset
         run: gunzip -k data/raw/fpa_monthly_close_raw_messy.csv.gz
-      - name: Regenerate the cleaned dataset (cleaner checks the raw file's SHA-256 first)
+      - name: Regenerate the cleaned dataset (the cleaner verifies the raw file's SHA-256 first)
         run: python src/clean_fpa_monthly_close.py --output-dir data/processed --no-excel-readback
-      - name: Compare the regenerated CSV with the approved reference hash (reported, not enforced)
+      - name: Report how the regenerated CSV matches the approved hash
         run: |
-          ref=c184b677bacc6f23086e3b5eedd71836643cb75064e428a1ebfee4c075fa9b47
-          got=$(sha256sum data/processed/fpa_monthly_close_cleaned.csv | cut -d' ' -f1)
-          if [ "$got" = "$ref" ]; then
-            echo "::notice::Regenerated cleaned CSV is byte-identical to the approved reference ($ref)"
-          else
-            # Observed: on some GitHub-hosted runners the cleaner's CSV differs by a few bytes from the one produced
-            # in the author's environment. The cause has not been established, so byte equality is reported, not enforced here.
-            echo "::warning::Regenerated cleaned CSV hash $got differs from the approved reference $ref (see README, Testing)"
-          fi
-      - name: SQL analysis pipeline on the regenerated CSV (fails unless every validation check passes)
+          python - <<'PY'
+          import sys
+          sys.path.insert(0, "src")
+          import sql_analysis_pipeline as sp
+          info = sp.verify_input(sp.DEFAULT_CSV)   # raises (job fails) if neither the exact nor the normalised hash matches
+          if info["sha_status"] == "exact":
+              print("::notice::Cleaned CSV is byte-identical to the approved reference (" + info["sha256"] + ")")
+          else:
+              print("::warning::Cleaned CSV is NOT byte-identical to the approved reference (got " + info["sha256"] + "). It matches only after "
+                    "rounding price_identity_log10_ratio and row_log10_magnitude to 8 significant digits: last-digit floating-point "
+                    "variation from this runner's CPU (docs/DATA_AND_CLEANING_METHODOLOGY.md, section 14). All other cells are identical.")
+          PY
+      - name: SQL analysis pipeline (fails unless every validation check passes)
+        run: python src/sql_analysis_pipeline.py
+      - name: Full-data SQL and cross-check tests
+        run: python -m pytest tests/test_sql_pipeline.py -q
+
+      # ---- Extended checks: manual runs only ---------------------------------------------------------------------
+      - name: Extended - install LibreOffice and Playwright (Chromium)
+        if: ${{ github.event_name == 'workflow_dispatch' }}
         run: |
-          got=$(sha256sum data/processed/fpa_monthly_close_cleaned.csv | cut -d' ' -f1)
-          python src/sql_analysis_pipeline.py --expected-sha256 "$got"
+          sudo apt-get update
+          sudo apt-get install -y --no-install-recommends libreoffice-calc
+          pip install playwright==1.56.0
+          python -m playwright install --with-deps chromium
+      - name: Extended - Excel workbook build and tests
+        if: ${{ github.event_name == 'workflow_dispatch' }}
+        run: |
+          python src/excel_workbook_builder.py
+          python -m pytest tests/test_excel_workbook.py -q
+      - name: Extended - dashboard build and browser tests
+        if: ${{ github.event_name == 'workflow_dispatch' }}
+        run: |
+          python src/dashboard_builder.py
+          python tests/dashboard_browser_qa.py
+          python tests/dashboard_negative_controls.py

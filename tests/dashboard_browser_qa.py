@@ -1,7 +1,9 @@
 """Dashboard browser QA for dashboard/fpa_financial_analytics_dashboard.html (real Chromium via Playwright).
 
 Independent expectations are computed with pandas from the cleaned CSV (not from the DuckDB/JS payload) and from the
-Excel workbook workbook. Results -> dashboard/qa_results.json (consumed by the report). Run:  python tests/dashboard_browser_qa.py
+main Excel workbook (excel/fpa_month_end_close_analysis.xlsx). Results -> build/dashboard_qa/qa_results.json (git-ignored).
+MANUAL test (not run by CI): needs Playwright with Chromium and the cleaned CSV. Run:  python tests/dashboard_browser_qa.py
+Optional: set DATAVIZ_VALIDATOR to a local validate_palette.js to add the palette-validator check; otherwise it is SKIPPED.
 """
 import asyncio, csv, io, json, re, sys, time, warnings
 from pathlib import Path
@@ -563,7 +565,11 @@ async def main():
         await br.close()
     json.dump({"skips": SKIPS, "results": RES, "file_bytes": size, "dcl_ms": nav["dcl"], "load_ms": nav["load"], "boot_ms": nav["boot"]}, open(OUT / "qa_results.json", "w"), indent=1)
     f = [r for r in RES if r["status"] == "FAIL"]
-    print(f"\n{len(RES)-len(f)} PASS / {len(f)} FAIL")
+    print(f"\n{len(RES)-len(f)} PASS / {len(f)} FAIL / {len(SKIPS)} SKIPPED")
+    for area, name, why in SKIPS:
+        print(f"SKIPPED (not a pass): {area} | {name} | {why}")
+    if f:
+        raise SystemExit(1)   # a failing check must fail the run (CI, scripts)
 
 
 # =============================================================================================================

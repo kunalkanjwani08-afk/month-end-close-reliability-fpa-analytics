@@ -1,6 +1,6 @@
 """Excel workbook tests - they open the SAVED workbook (excel/fpa_month_end_close_analysis.xlsx), never the in-memory writer.
 
-Run from the repository root:   python -m pytest tests/test_excel_workbook_builder.py -q
+Run from the repository root:   python -m pytest tests/test_excel_workbook.py -q
 Prerequisite: python src/excel_workbook_builder.py has been run (the workbook and MANIFEST.json exist).
 
 What is proven here, and what is not
@@ -41,7 +41,7 @@ FIXED = dt.datetime(2026, 10, 29, 12, 0, 0)
 
 pytestmark = pytest.mark.skipif(not XLSX.exists(), reason="workbook not generated yet: run python src/excel_workbook_builder.py")
 needs_lo = pytest.mark.skipif(not (shutil.which("soffice") or shutil.which("libreoffice")), reason="LibreOffice not available")
-needs_csv = pytest.mark.skipif(not CSV.exists(), reason="canonical cleaned CSV not present (data/processed/)")
+needs_csv = pytest.mark.skipif(not CSV.exists(), reason="cleaned CSV not present (data/processed/)")
 
 
 # ---------------------------------------------------------------------------------------------------------------------
@@ -565,7 +565,7 @@ def test_unresolved_rules_are_preserved_verbatim(wv):
         assert m.group(1).replace("`", "") == status, rid
     for rid in ("R9", "R11", "R12"):
         assert got[rid].startswith("Unresolved"), rid
-    assert got["R6"].startswith("Proposed") and got["R10"].startswith("Proposed")
+    assert got["R6"].startswith("Assumption") and got["R10"].startswith("Assumption")
 
 
 def test_no_forbidden_labels_or_invented_metrics(wf):
@@ -596,7 +596,7 @@ def test_lineage_and_source_identity_recorded(wv, con):
     facts = {ws.cell(i, 1).value: ws.cell(i, 3).value for i in range(r + 2, r + 20) if ws.cell(i, 1).value}
     assert facts["SQL analysis database SHA-256"] == sha(DB)
     assert facts["SQL analysis manifest SHA-256"] == sha(sqlp.DEFAULT_OUT / "MANIFEST.json")
-    assert facts["Approved canonical cleaned CSV SHA-256"] == sqlp.EXPECTED_SHA256
+    assert facts["Approved cleaned CSV SHA-256"] == sqlp.EXPECTED_SHA256
     assert re.fullmatch(r"[0-9a-f]{64}", facts["Generator script SHA-256 (src/excel_workbook_builder.py)"])
     assert re.fullmatch(r"\d{4}-\d\d-\d\dT\d\d:\d\d:\d\dZ", facts["Generated at (UTC)"])
     for t in sqlp.REQUIRED_VALIDATION_TABLES:
@@ -695,8 +695,8 @@ def test_wrong_csv_hash_is_refused(tmp_path):
 
 
 @needs_csv
-def test_canonical_csv_and_raw_csv_unchanged():
-    assert sha(CSV) == sqlp.EXPECTED_SHA256
+def test_cleaned_csv_matches_approved_hash_and_raw_csv_unchanged():
+    assert sqlp.verify_input(CSV)["sha_status"] in ("exact", "normalised")
     raw = ROOT / "data" / "raw" / "fpa_monthly_close_raw_messy.csv"
     if raw.exists():
         assert sha(raw) == "a0e6eddde25280aa27a60c5955743d3243b14138d876eedac0547e24a1cc6fff"

@@ -217,11 +217,23 @@ Verified: revenue is $202.65M (Posted only), $404.38M (excluding Rejected) and $
 | Key totals against an independent pandas reference | Agreed within tolerance | Independent validation `F_I1` |
 | Python cross-check of the SQL results | Passed | `independent_crosscheck.py` |
 
-Details and the one historical failure are in QA_AND_VALIDATION_SUMMARY.md.
+Details and the one historical failure are in the issue log, [`excel/issue_log.xlsx`](../excel/issue_log.xlsx) (the one historical failure is ISS-02: running the Excel tests after a database rebuild failed because the DuckDB file is not byte-identical between rebuilds; its content is. The run order in `HOW_TO_RUN.txt` now reflects this).
 
 ## 9. Running the SQL layer
 
-The runnable sequence is in [HOW_TO_RUN.txt](../HOW_TO_RUN.txt). In short, the pipeline script loads the cleaned CSV, executes the scripts in order, exports the CSVs and writes the manifest. It was re-run in independent validation on Linux and reproduced the outputs. It has not been run on Windows or on a clean machine.
+**Prerequisites.** Python 3.11+, `pip install -r requirements.txt` (the `duckdb` package is the database; no server), and the 192-column cleaned CSV regenerated into `data/processed/` ([HOW_TO_RUN.txt](../HOW_TO_RUN.txt), steps 1-2).
+
+**Command** (repository root; on Windows `python src\sql_analysis_pipeline.py`):
+
+```
+python src/sql_analysis_pipeline.py
+```
+
+**Expected output.** `[1/4] input verified (exact)`, twelve lines `NN_name.sql: n statements`, `independent pandas cross-check: 124 figures recomputed`, `[4/4] validated and promoted 72 output tables`, `FINISHED in ~20 s`, exit code 0 (55 + 24 + 86 + 124 = 289 validation rows PASS). On a CPU without AVX-512 the first line may read `(normalised)` with a WARNING: see [the methodology](DATA_AND_CLEANING_METHODOLOGY.md), section 14.
+
+**Common failures.** Exit 1: the CSV is missing or has the wrong shape (run the cleaner with `--output-dir data/processed`). Exit 2: the file is not the approved cleaned output, or a validation row failed; the failed run is kept in `build/sql_results_failed_run/` and nothing accepted is overwritten.
+
+**Tested:** Linux, in a fresh virtual environment built from `requirements.txt`, and on GitHub Actions (Ubuntu). **Not tested:** Windows.
 
 ## 10. Limitations
 

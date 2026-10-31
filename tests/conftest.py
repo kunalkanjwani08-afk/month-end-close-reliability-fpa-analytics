@@ -1,9 +1,9 @@
 """pytest configuration for the SQL analysis tests.
 
-Why this file exists: tests that need the private canonical cleaned CSV are marked `fulldata` and are SKIPPED when the
+Why this file exists: tests that need the locally regenerated 192-column cleaned CSV are marked `fulldata` and are SKIPPED when the
 CSV is absent. A skipped test proves nothing, so a run in which any `fulldata` test was skipped is reported loudly as
 INCOMPLETE and exits non-zero. Set ALLOW_SKIPPED_FULLDATA_TESTS=1 only for a deliberate fixture-only run (for example on a
-machine that never has the private CSV); the banner is still printed.
+machine that never regenerates the cleaned CSV, such as the fast CI job); the banner is still printed.
 """
 from __future__ import annotations
 
@@ -11,11 +11,11 @@ import os
 
 import pytest
 
-SKIP_REASON_FRAGMENTS = ("canonical cleaned CSV not present", "LibreOffice not available")
+SKIP_REASON_FRAGMENTS = ("cleaned CSV not present", "LibreOffice not available")
 
 
 def pytest_configure(config):
-    config.addinivalue_line("markers", "fulldata: needs the canonical cleaned CSV (and, for integration tests, a full database build)")
+    config.addinivalue_line("markers", "fulldata: needs the cleaned CSV (and, for integration tests, a full database build)")
 
 
 def _skipped_fulldata(terminalreporter) -> list:
@@ -36,7 +36,7 @@ def pytest_terminal_summary(terminalreporter, exitstatus, config):
     terminalreporter.write_line(f"PASS: {passed}    FAIL: {failed}    SKIP: {skipped} (of which full-data tests skipped: {fd})")
     if fd:
         terminalreporter.write_line(
-            f"INCOMPLETE - {fd} test(s) were SKIPPED because the canonical cleaned CSV or LibreOffice is absent. "
+            f"INCOMPLETE - {fd} test(s) were SKIPPED because the cleaned CSV or LibreOffice is absent. "
             "This is NOT a full pass: place data/processed/fpa_monthly_close_cleaned.csv / install LibreOffice and rerun.", red=True, bold=True)
 
 

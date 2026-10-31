@@ -2,15 +2,19 @@
 
 Related: [DATA_DICTIONARY.md](DATA_DICTIONARY.md) (columns), [DATA_PROVENANCE.md](DATA_PROVENANCE.md) (origin).
 
-**This document defines candidate metrics and the rules that must be validated before any financial result is published. It contains no financial results.** Counts of rows are shown as evidence for rules; no revenue, profit or variance totals are reported anywhere in the repository yet.
+**This document is the definition layer.** It defines the metrics and the accounting rules (R1-R12) behind every figure in the project, and records the evidence status of each rule. Revenue, profit and variance results are not reported here: they are in [FINANCIAL_ANALYSIS_REPORT.md](FINANCIAL_ANALYSIS_REPORT.md), [INSIGHT_REGISTER.md](INSIGHT_REGISTER.md), [EXECUTIVE_SUMMARY.md](EXECUTIVE_SUMMARY.md), the Excel workbook and the dashboard, and they inherit the status of the rules below: any result that depends on a rule marked Assumption or Unresolved is **provisional**. All figures describe the synthetic NovaBridge Industries dataset.
 
 ## Status labels
 
 | Label | Meaning |
 |---|---|
-| **Confirmed** | Stated by the project owner in the brief, or a plain observed fact about the file. Not an accounting judgement. |
-| **Proposed—Needs Validation** | A candidate rule supported by some evidence. It becomes Confirmed only after the stated validation passes and the owner agrees. |
+| **Verified** | Checked against a project file or by a check that was run (for example a count, a hash or a test). It is a fact about the file or the code, not an accounting judgement. |
+| **Owner-stated** | The project owner's own statement. Nobody else has checked it. |
+| **Assumption** | A provisional project rule supported by some evidence. It is used so the analysis can proceed, and it becomes settled only after the stated validation passes and the owner agrees. Results that depend on it are provisional. |
 | **Unresolved** | The data does not settle it. A decision or source information is needed. Until then the safe default is shown, and affected rows are counted, not silently dropped or guessed. |
+| **Not tested** | A check that has not been run. It is listed, never reported as passed. |
+
+(Earlier versions of this document used "Confirmed" and "Proposed - Needs Validation". They map to Verified or Owner-stated, and to Assumption, respectively.)
 
 A rule being written here does not make it verified.
 
@@ -18,20 +22,20 @@ A rule being written here does not make it verified.
 
 | ID | Rule | Status | Basis |
 |---|---|---|---|
-| R1 | Amounts are text. Do not sum raw values. | Confirmed | Owner-stated; all 43 columns are text. |
-| R2 | P&L flows and balance-sheet balances are never added together. | Confirmed | Owner-stated. |
-| R3 | `TOTAL`, `Subtotal`, `CHECK` rows (identified by `notes` = `subtotal row`, 350 rows) are not postings and are excluded from all calculations. | Confirmed (identification) | All 350 rows carry non-posting labels in `account_name` or `fs_line`; every row with such a label is in the 350. The exclusion principle is owner-stated. |
-| R4 | Rows for the junk entities `TEST ENTITY`, `Do not use`, `xxx` (173 rows) are excluded. | Confirmed (owner-stated for TEST ENTITY); Proposed—Needs Validation for the other two names | Not independently confirmed that `Do not use` and `xxx` are non-reporting. |
-| R5 | `document_no` is not a unique posting key and repeated numbers are not automatically duplicates. | Confirmed | 4,260 numbers repeat over 8,540 rows; no two rows are identical apart from `row_id`. |
-| R6 | Only `approval_status` values with an explicit treatment enter reported totals (section 5). | Proposed—Needs Validation | See section 5. |
-| R7 | `report_scale` labels are not trusted; scale is decided per row by a written rule. | Confirmed (labels unreliable, owner-stated); rule itself Unresolved | Section 8. |
-| R8 | FX direction is USD = local ÷ rate (local currency per 1 USD). | Proposed—Needs Validation | Section 9. Not final. |
+| R1 | Amounts are text. Do not sum raw values. | Owner-stated; Verified (all 43 columns are text) | Section 3 of the methodology. |
+| R2 | P&L flows and balance-sheet balances are never added together. | Owner-stated | Applied in every population definition. |
+| R3 | `TOTAL`, `Subtotal`, `CHECK` rows (identified by `notes` = `subtotal row`, 350 rows) are not postings and are excluded from all calculations. | Verified (identification); Owner-stated (exclusion principle) | All 350 rows carry non-posting labels in `account_name` or `fs_line`; every row with such a label is in the 350. The exclusion principle is owner-stated. |
+| R4 | Rows for the junk entities are excluded: `TEST ENTITY`, `Do not use`, `xxx` by name and codes `99`, `T999` by code. **204 rows in total** = 60 by name only + 113 by name and code + 31 by code only (173 by name, 144 by code; the name-only figure 173 quoted in early scoping documents is a subset). | Owner-stated for `TEST ENTITY`; Assumption for the other names and the two codes | Not independently confirmed that `Do not use`, `xxx`, `99` and `T999` are non-reporting. Counts: Verified from the cleaned CSV (`junk_entity_basis`). |
+| R5 | `document_no` is not a unique posting key and repeated numbers are not automatically duplicates. | Verified | 4,260 numbers repeat over 8,540 rows; no two rows are identical apart from `row_id`. |
+| R6 | Only `approval_status` values with an explicit treatment enter reported totals (section 5). | Assumption | See section 5. |
+| R7 | `report_scale` labels are not trusted; scale is decided per row by a written rule. | Owner-stated (labels unreliable); the per-row decision rule is an Assumption; the ground truth is Unresolved | Section 8. |
+| R8 | FX direction is USD = local ÷ rate (local currency per 1 USD). | Assumption | Section 9. Not final. |
 | R9 | Account sign convention. | Unresolved | Section 6. |
-| R10 | Variance = Actual − Budget; variance percent uses \|Budget\| as denominator. This is a proposed project convention, not an accounting standard. | Proposed—Needs Validation | Section 2. |
-| R14 | Every raw row gets exactly one primary exclusion reason or is eligible, using a fixed precedence. Secondary issues are separate flags. | Proposed—Needs Validation | Section 4. |
+| R10 | Variance = Actual − Budget; variance percent uses \|Budget\| as denominator. This is a proposed project convention, not an accounting standard. | Assumption | Section 2. |
+| R14 | Every raw row gets exactly one primary exclusion reason or is eligible, using a fixed precedence. Secondary issues are separate flags. | Assumption | Section 4. |
 | R11 | Duplicate rule for journal lines. | Unresolved | Section 11. |
 | R12 | Consolidation and intercompany elimination. | Unresolved | Section 12. |
-| R13 | Python, SQL and Excel reconcile on a fixed scope; differences are investigated, not forced. | Confirmed (principle) | Owner-stated; checked by the test suite. |
+| R13 | Python, SQL and Excel reconcile on a fixed scope; differences are investigated, not forced. | Owner-stated (principle); Verified by the test suites | Section 11. |
 
 ## 2. Actual versus budget variance
 
@@ -55,7 +59,7 @@ A rule being written here does not make it verified.
 - **Scope:** P&L, eligible rows, at a chosen grain (entity, account, period). The grain must be fixed first because errors cancel when summed over larger groups.
 - **Interpretation:** WAPE weights large lines more; mean of row percentages weights all lines equally and is dominated by small values.
 - **Edge cases:** actual of zero gives an undefined line percent (excluded from the mean, still counted in WAPE); `1 − WAPE` can be negative and must not be floored silently.
-- **Status:** Proposed—Needs Validation. Depends on the same open question as section 2 about the grain of forecast values.
+- **Status:** Assumption. Depends on the same open question as section 2 about the grain of forecast values.
 
 ## 4. Eligible rows and exclusion-reason precedence (scope gate)
 
@@ -65,13 +69,13 @@ For each metric scope: `eligible + Σ rows per primary reason = 152,682`. This i
 
 | Order | Primary exclusion reason (row fails this step) | Status |
 |---|---|---|
-| 1 | Non-posting row (`notes` = `subtotal row`; R3) | Confirmed |
-| 2 | Junk entity (`TEST ENTITY`, `Do not use`, `xxx`; R4) | Proposed—Needs Validation |
-| 3 | Entity not resolvable (blank or unmapped after name and code mapping) | Proposed—Needs Validation |
-| 4 | Out of scope for this metric: balance-sheet row in a P&L metric, or the reverse (R2). Not an error; reported in its own view | Confirmed |
-| 5 | Journal status not eligible (section 5). The status value is kept, so `Rejected`, `pending`, `Parked` and blank are separately countable | Proposed—Needs Validation |
-| 6 | Period not resolvable to a month | Proposed—Needs Validation |
-| 7 | Amount missing or unparsable in the column this metric uses | Proposed—Needs Validation |
+| 1 | Non-posting row (`notes` = `subtotal row`; R3) | Verified |
+| 2 | Junk entity (`TEST ENTITY`, `Do not use`, `xxx` by name; `99`, `T999` by code; R4; 204 rows) | Owner-stated / Assumption (see R4) |
+| 3 | Entity not resolvable (blank or unmapped after name and code mapping) | Assumption |
+| 4 | Out of scope for this metric: balance-sheet row in a P&L metric, or the reverse (R2). Not an error; reported in its own view | Owner-stated (R2) |
+| 5 | Journal status not eligible (section 5). The status value is kept, so `Rejected`, `pending`, `Parked` and blank are separately countable | Assumption |
+| 6 | Period not resolvable to a month | Assumption |
+| 7 | Amount missing or unparsable in the column this metric uses | Assumption |
 | 8 | Scale undecidable (section 8) | Unresolved |
 | 9 | Removed as a duplicate (section 11) | Unresolved |
 
@@ -85,12 +89,12 @@ For each metric scope: `eligible + Σ rows per primary reason = 152,682`. This i
 
 Observed `approval_status`: `Posted` 65,381 (42.8% of rows), `pending` 22,072, `Rejected` 21,795, `Parked` 21,650, empty 21,784. There is no `Approved` value. The statuses are **not** treated identically.
 
-| Value | Proposed treatment | Status |
+| Value | Provisional treatment | Status |
 |---|---|---|
-| `Posted` | Eligible for reported totals | Proposed—Needs Validation |
-| `Rejected` | Excluded from reported totals and from any pipeline view | Proposed—Needs Validation |
-| `pending` | Excluded from reported totals. Counted and reported as unposted items in the close-control view | Proposed—Needs Validation |
-| `Parked` | Same as `pending`. A parked journal is held, not rejected, so keep it separate from `Rejected` | Proposed—Needs Validation |
+| `Posted` | Eligible for reported totals | Assumption |
+| `Rejected` | Excluded from reported totals and from any pipeline view | Assumption |
+| `pending` | Excluded from reported totals. Counted and reported as unposted items in the close-control view | Assumption |
+| `Parked` | Same as `pending`. A parked journal is held, not rejected, so keep it separate from `Rejected` | Assumption |
 | empty | Excluded from reported totals until the owner decides what blank means. Counted as its own category | Unresolved |
 
 Consequence: with this proposal only about 43% of rows could enter reported totals. That is large enough that the proportion itself must be confirmed as intended before any total is published. The status mix is nearly identical for every entity (Posted 42.5% to 43.2%, each other value about 14%) and for P&L and balance-sheet rows. A real posting workflow would rarely look this uniform, so the statuses may be generated noise. That is an observation to investigate, not a conclusion.
@@ -110,14 +114,14 @@ Observed on rows labelled `Actual` scale (parsable, non-zero `actual_usd_raw`):
 | 1xxx and 2xxx balance sheet (typical) | about 7% | positive for assets and liabilities alike |
 
 - **Reading:** revenue, costs and balances look like positive magnitudes with a minority of negatives, not Dr/Cr signed values. Discounts and FX gain/loss are mixed. Whether negatives are credits, reversals or noise is not known.
-- **Candidate convention (Proposed—Needs Validation):** treat revenue and costs as positive magnitudes. Profit measures subtract costs from revenue; they never add rows blindly. Variance interpretation: for revenue and profit accounts, positive variance is favourable; for cost accounts, positive variance is unfavourable. Discounts (4190) and FX (7200) need an explicit decision. **Unresolved.**
+- **Provisional convention (Assumption):** treat revenue and costs as positive magnitudes. Profit measures subtract costs from revenue; they never add rows blindly. Variance interpretation: for revenue and profit accounts, positive variance is favourable; for cost accounts, positive variance is unfavourable. Discounts (4190) and FX (7200) need an explicit decision. **Unresolved.**
 - **Edge cases:** negative values are not errors by default (credits, reversals). Balance-sheet balances are not netted without an asset/liability mapping.
 - **Validation:** a per-account sign table reviewed by the owner before use, then tested against fixtures.
 
 ## 7. P&L versus balance sheet
 
-- **Rule (Confirmed):** the two are separate. P&L amounts are flows over a period and can be summed across periods. Balance-sheet amounts are balances at a point in time and **cannot be summed across periods**.
-- **Identification (Proposed—Needs Validation):** normalise the ten `statement` labels to two. Cross-checks that agree: `Working capital` account group appears only on balance-sheet labelled rows; every 1xxx/2xxx account is balance-sheet labelled; no 4xxx to 8xxx account is.
+- **Rule (Owner-stated):** the two are separate. P&L amounts are flows over a period and can be summed across periods. Balance-sheet amounts are balances at a point in time and **cannot be summed across periods**.
+- **Identification (Assumption; cross-checks below are Verified):** normalise the ten `statement` labels to two. Cross-checks that agree: `Working capital` account group appears only on balance-sheet labelled rows; every 1xxx/2xxx account is balance-sheet labelled; no 4xxx to 8xxx account is.
 - **Unresolved:** whether a balance-sheet line is an opening, closing or movement amount. Without that, balance-sheet trends are not computed.
 - **Trends:** P&L trends by period, entity, division and account only; balance-sheet shown separately as period snapshots once the above is answered.
 
@@ -143,7 +147,7 @@ Owner-stated: some `Thousands` and `Lakhs` rows really were divided, and some la
 
 `actual_usd_raw` is already provided in USD, so conversion is not needed to build the reported figure. FX is used mainly to cross-check `amount_local_raw` and to flag disagreement.
 
-- **Candidate direction (Proposed—Needs Validation):** `usd = local ÷ rate`, rate being local currency per 1 USD.
+- **Provisional direction (Assumption):** `usd = local ÷ rate`, rate being local currency per 1 USD.
 - **Evidence:** among 125,699 rows where local amount, rate and actual USD all parse, are non-zero and rate is above zero, `local ÷ rate` is within 2% (or 1 USD) of `actual_usd` in 109,581 rows (87.2%). `local × rate` fits 12,586 rows (10.0%). The remaining rows do not fit either, possibly because of scale or parsing issues. The two counts were not de-duplicated, so overlap is possible.
 - **Unresolved items:**
   - 2,517 rows have rate `0`. A zero rate is invalid and cannot convert. Do not default to 1.
@@ -157,7 +161,7 @@ Owner-stated: some `Thousands` and `Lakhs` rows really were divided, and some la
 
 - A value that cannot be parsed is **missing**, not zero, until the owner decides whether `-` means zero.
 - Required for reported totals: entity, period, GL account, statement, amount in the relevant column, approval status. If any is missing the row is excluded and counted.
-- Allowed to be blank: `cost_center_*` on non-cost-centre lines, `product_family`, `customer_segment`, `channel`, `qty_raw`, `uom`, `headcount_fte_raw`, `region` (derivable), `notes`. All are Proposed—Needs Validation.
+- Allowed to be blank: `cost_center_*` on non-cost-centre lines, `product_family`, `customer_segment`, `channel`, `qty_raw`, `uom`, `headcount_fte_raw`, `region` (derivable), `notes`. All are Assumptions.
 - 3,101 rows have no `gl_account` and are not flagged non-posting. Whether they can be recovered from `account_name` or `fs_line` is Unresolved.
 
 ## 11. Duplicate journal lines
@@ -173,7 +177,7 @@ About 5,761 rows are flagged intercompany (after normalising spellings), 24,494 
 
 ## 13. Reconciliation across Python, SQL and Excel
 
-- **Rule (Confirmed principle):** fix one scope in writing, compute it independently in each tool, and investigate every difference. Do not adjust one tool to match another.
+- **Rule (Owner-stated principle):** fix one scope in writing, compute it independently in each tool, and investigate every difference. Do not adjust one tool to match another.
 - **Candidate scope for the first reconciliation:** one entity, one period, P&L, eligible rows. Totals compared to the cent, with the row count compared first.
 - **Known sources of legitimate disagreement:** text-to-number parsing, rounding, treatment of empty strings versus nulls, case and whitespace in joins, and integer or float arithmetic.
 - **Method and tests:** the pytest suites in `tests/`.

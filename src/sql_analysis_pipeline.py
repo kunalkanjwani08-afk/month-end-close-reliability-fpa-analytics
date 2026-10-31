@@ -6,8 +6,10 @@ Usage (from the repository root):
     python src/sql_analysis_pipeline.py --csv PATH --db PATH --out-dir PATH
 
 What it does, in order (it stops at the first failed gate, before anything is written):
-  1. Verifies the canonical cleaned CSV: it exists, SHA-256 matches, 152,682 rows, 192 columns,
-     header equals the expected schema (hash of the header line) and the required fields exist.
+  1. Verifies the cleaned CSV (192 columns, regenerated from the raw file by src/clean_fpa_monthly_close.py): it exists, its
+     SHA-256 matches the approved value exactly - or, as a reported (never silent) fallback, after rounding two floating-point
+     diagnostic columns (see NORMALISED_SHA256) - it has 152,682 rows and 192 columns, the header equals the expected schema
+     (hash of the header line) and the required fields exist.
   2. Builds the DuckDB file in a temporary path:
        stg_close_raw  all 192 columns as TEXT: the parsed source field values (blank = ''); byte-level integrity is the SHA-256 gate
        fact_close     same rows, typed (blank -> NULL), row_id traceability kept
@@ -22,13 +24,14 @@ LIMIT (not overclaimed): promotion moves many files one at a time (each move is 
 error DURING promotion (after validation passed) can leave some new CSVs next to an older MANIFEST/database. The order
 (CSVs, then MANIFEST, then database) means the database, the last item, changes only after everything else succeeded, and
 tests/MANIFEST verification detects a mixed state. Validation failures, which are the normal failure path, never reach it.
-The canonical CSV and the raw data are only ever read.
+The cleaned CSV and the raw data are only ever read.
 """
 from __future__ import annotations
 
 import argparse
 import csv
 import hashlib
+import io
 import json
 import os
 import shutil
@@ -47,6 +50,15 @@ SQL_DIR = ROOT / "sql" / "analysis"
 
 # ---- facts reported by the cleaning stage (QC_Report of the run that produced the CSV) -------------
 EXPECTED_SHA256 = "c184b677bacc6f23086e3b5eedd71836643cb75064e428a1ebfee4c075fa9b47"
+# Floating-point last-digit variation (investigated 31 Oct 2026, see docs/DATA_AND_CLEANING_METHODOLOGY.md, section 14):
+# on CPUs without AVX-512 numpy's log10 differs from the reference environment in the last 1-15 ulps, so the cleaner writes
+# a different last digit into exactly two diagnostic columns (14,071 cells; 190 of the 192 columns are identical, no flag or
+# decision changes). The byte-exact SHA-256 above stays the primary gate. If, and only if, it fails, the file is accepted
+# when its NORMALISED hash matches: the same CSV re-serialised with those two columns rounded to 8 significant digits.
+# Acceptance by the fallback is never silent: verify_input() reports sha_status = "normalised" and the pipeline prints a warning.
+NORMALISED_SHA256 = "7ceb8cafb8205aa95c0d716ef9bbba409750c6f247f14cc9e7f1b0efed7e5477"
+FLOAT_VARIANT_COLUMNS = ("price_identity_log10_ratio", "row_log10_magnitude")
+NORMALISED_SIGNIFICANT_DIGITS = 8
 EXPECTED_ROWS = 152_682
 REQUIRED_VALIDATION_TABLES = ("out_val_load", "out_val_exclusion_counts", "out_val_analytical", "out_val_crosscheck")
 EXPECTED_COLS = 192
@@ -107,21 +119,64 @@ def read_header(path: Path) -> list[str]:
         return next(csv.reader(f))
 
 
+def normalised_sha256(path: Path, columns=FLOAT_VARIANT_COLUMNS, digits: int = NORMALISED_SIGNIFICANT_DIGITS) -> str:
+    """SHA-256 of the CSV re-serialised (LF line ends, minimal quoting) with `columns` rounded to `digits` significant digits.
+
+    Used only as the documented fallback of verify_input(): it ignores last-digit floating-point differences in those columns and
+    nothing else. Every other cell, the header, the row order and the row count must be identical."""
+    h = hashlib.sha256()
+    buf = io.StringIO()
+    writer = csv.writer(buf, lineterminator="\n")
+    fmt = "." + str(digits) + "g"
+    with open(path, encoding="utf-8-sig", newline="") as f:
+        reader = csv.reader(f)
+        header = next(reader)
+        idx = [header.index(c) for c in columns if c in header]
+        writer.writerow(header)
+        for n, row in enumerate(reader, 1):
+            for i in idx:
+                v = row[i]
+                if v != "":
+                    try:
+                        row[i] = format(float(v), fmt)
+                    except ValueError:
+                        pass  # not a number: leave as is (it will then differ from the reference)
+            writer.writerow(row)
+            if n % 5000 == 0:
+                h.update(buf.getvalue().encode("utf-8"))
+                buf.seek(0)
+                buf.truncate(0)
+    h.update(buf.getvalue().encode("utf-8"))
+    return h.hexdigest()
+
+
 def verify_input(csv_path: Path, expected_sha: str = EXPECTED_SHA256, expected_rows: int = EXPECTED_ROWS,
-                 expected_cols: int = EXPECTED_COLS) -> dict:
-    """Gate 1. Raises before any database is created."""
+                 expected_cols: int = EXPECTED_COLS, expected_normalised: str | None = NORMALISED_SHA256) -> dict:
+    """Gate 1. Raises before any database is created.
+
+    sha_status is "exact" (byte-identical to the approved file) or "normalised" (identical except last-digit floating-point
+    variation in FLOAT_VARIANT_COLUMNS). Anything else raises IntegrityError."""
     if not csv_path.exists():
         raise PipelineError(
-            f"Canonical cleaned CSV not found: {csv_path}\n"
+            f"Cleaned CSV not found: {csv_path}\n"
             "SQL analysis needs fpa_monthly_close_cleaned.csv (152,682 rows x 192 columns) produced by "
-            "src/clean_fpa_monthly_close.py. Do not rebuild it from the 77-column workbook sheet.")
+            "src/clean_fpa_monthly_close.py --output-dir data/processed. Do not rebuild it from the 77-column workbook sheet.")
     if csv_path.stat().st_size == 0:
-        raise PipelineError(f"The canonical CSV is empty (0 bytes): {csv_path}")
+        raise PipelineError(f"The cleaned CSV is empty (0 bytes): {csv_path}")
     sha = sha256_file(csv_path)
-    if sha != expected_sha:
-        raise IntegrityError(
-            f"SHA-256 mismatch for {csv_path}\n  actual  : {sha}\n  expected: {expected_sha}\n"
-            "The file is not the cleaned output the data cleaning report describes. Nothing was loaded.")
+    norm = None
+    if sha == expected_sha:
+        status = "exact"
+    else:
+        norm = normalised_sha256(csv_path) if expected_normalised else None
+        if expected_normalised and norm == expected_normalised:
+            status = "normalised"
+        else:
+            raise IntegrityError(
+                f"SHA-256 mismatch for {csv_path}\n  actual  : {sha}\n  expected: {expected_sha}\n"
+                + (f"  normalised actual  : {norm}\n  normalised expected: {expected_normalised}\n" if expected_normalised else "")
+                + "The file is not the cleaned output the data cleaning report describes (a last-digit floating-point difference in "
+                  f"{', '.join(FLOAT_VARIANT_COLUMNS)} would have been accepted, but something else differs). Nothing was loaded.")
     header = read_header(csv_path)
     if len(header) != expected_cols:
         raise PipelineError(f"Expected {expected_cols} columns, found {len(header)}.")
@@ -134,7 +189,8 @@ def verify_input(csv_path: Path, expected_sha: str = EXPECTED_SHA256, expected_r
     missing = [c for c in REQUIRED_FIELDS if c not in header]
     if missing:
         raise PipelineError(f"Required fields missing from the CSV header: {missing}")
-    return {"sha256": sha, "bytes": csv_path.stat().st_size, "n_cols": len(header), "header": header}
+    return {"sha256": sha, "sha_status": status, "normalised_sha256": norm, "bytes": csv_path.stat().st_size,
+            "n_cols": len(header), "header": header}
 
 
 def build_database(csv_path: Path, db_tmp: Path, expected_rows: int = EXPECTED_ROWS) -> duckdb.DuckDBPyConnection:
@@ -297,8 +353,13 @@ def main(argv=None) -> int:
     t0 = time.time()
     con = None
     try:
-        info = verify_input(args.csv, args.expected_sha256)
-        print(f"[1/4] input verified: {args.csv}\n      sha256={info['sha256']}\n      {info['bytes']:,} bytes, {info['n_cols']} columns")
+        info = verify_input(args.csv, args.expected_sha256,
+                            expected_normalised=NORMALISED_SHA256 if args.expected_sha256 == EXPECTED_SHA256 else None)
+        print(f"[1/4] input verified ({info['sha_status']}): {args.csv}\n      sha256={info['sha256']}\n      {info['bytes']:,} bytes, {info['n_cols']} columns")
+        if info["sha_status"] == "normalised":
+            print("      WARNING: the file is NOT byte-identical to the approved CSV. It matches after rounding "
+                  f"{' and '.join(FLOAT_VARIANT_COLUMNS)} to {NORMALISED_SIGNIFICANT_DIGITS} significant digits (last-digit floating-point "
+                  "variation from the CPU that ran the cleaner). All other cells are identical.", file=sys.stderr)
         args.db.parent.mkdir(parents=True, exist_ok=True)
         tmp = args.db.with_suffix(".duckdb.partial")
         con = build_database(args.csv, tmp)

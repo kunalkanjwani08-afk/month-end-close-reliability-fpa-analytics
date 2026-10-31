@@ -1,6 +1,6 @@
 """SQL analysis independent cross-check.
 
-Recomputes the material SQL analysis aggregates with pandas, straight from the canonical cleaned CSV, and compares them
+Recomputes the material SQL analysis aggregates with pandas, straight from the 192-column cleaned CSV, and compares them
 with the tables produced by the DuckDB SQL (out_* tables). No SQL view or SQL logic is reused: populations and
 metrics are re-implemented from the documented definitions, so an error in a SQL join, filter or window cannot
 cancel itself out.

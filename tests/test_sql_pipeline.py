@@ -1,10 +1,11 @@
 """SQL analysis automated tests (DuckDB SQL layer + independent pandas cross-check).
 
-FULL-DATA tests: they need the private canonical cleaned CSV. When it is absent they are SKIPPED and the run is reported
-INCOMPLETE by conftest.py (non-zero exit) - a skip is never a pass. Fixture tests that need no data live in
-tests/test_sql_pipeline_units.py.
+FULL-DATA tests: they need the 192-column cleaned CSV, which is not stored in the repository. Regenerate it locally from the
+published raw file:  python src/clean_fpa_monthly_close.py --output-dir data/processed   (about 4-5 minutes; see HOW_TO_RUN.txt).
+When it is absent these tests are SKIPPED and the run is reported INCOMPLETE by conftest.py (non-zero exit) - a skip is never a
+pass. Fixture tests that need no data live in tests/test_sql_pipeline_units.py.
 Run:  python -m pytest tests -q
-The module builds the SQL analysis database once from the canonical cleaned CSV (about 25 s) into a temp folder and never
+The module builds the SQL analysis database once from the locally regenerated cleaned CSV (about 25 s) into a temp folder and never
 touches build/fpa_analysis.duckdb. Tests cover: input gates and failure behaviour, schema/keys/types, every
 SQL validation check, the independent cross-check, run-to-run reproducibility, and *mutation tests* that prove the
 validations can actually fail when the data or an output is wrong (a check that cannot fail proves nothing).
@@ -27,7 +28,7 @@ import sql_analysis_pipeline as pp  # noqa: E402
 
 CSV = pp.DEFAULT_CSV
 pytestmark = [pytest.mark.fulldata,
-              pytest.mark.skipif(not CSV.exists(), reason="canonical cleaned CSV not present (data/processed/)")]
+              pytest.mark.skipif(not CSV.exists(), reason="cleaned CSV not present (data/processed/)")]
 
 
 def _sha(path: Path) -> str:
@@ -47,8 +48,9 @@ def _run_sql(con, name: str):
 def built(tmp_path_factory):
     base = tmp_path_factory.mktemp("sql")
     db, out = base / "t.duckdb", base / "out"
+    before = _sha(CSV)
     assert pp.main(["--csv", str(CSV), "--db", str(db), "--out-dir", str(out)]) == 0
-    return {"db": db, "out": out, "base": base}
+    return {"db": db, "out": out, "base": base, "csv_sha_before": before}
 
 
 @pytest.fixture()
@@ -59,13 +61,17 @@ def con(built):
 
 
 # ---------------------------------------------------------------------------------------------- input gates
-def test_input_is_the_verified_canonical_file():
+def test_input_is_the_verified_cleaned_file():
+    """Byte-identical to the approved CSV ("exact") or, on CPUs whose log10 differs in the last digits, identical after
+    normalising the two documented float columns ("normalised"). Any other difference raises."""
     info = pp.verify_input(CSV)
-    assert info["sha256"] == pp.EXPECTED_SHA256 and info["n_cols"] == 192
+    assert info["sha_status"] in ("exact", "normalised") and info["n_cols"] == 192
+    if info["sha_status"] == "exact":
+        assert info["sha256"] == pp.EXPECTED_SHA256
 
 
-def test_canonical_csv_is_not_modified_by_the_run(built):
-    assert _sha(CSV) == pp.EXPECTED_SHA256
+def test_cleaned_csv_is_not_modified_by_the_run(built):
+    assert _sha(CSV) == built["csv_sha_before"]
 
 
 # ---------------------------------------------------------------------------------------------- schema and load

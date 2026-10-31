@@ -61,7 +61,7 @@ The reconciliation checks by area are: Population 5, Monthly P&L 10, Cross-sheet
 - **Variance** and **variance %** follow the rule in section 2. WAPE and bias are computed from summed absolute and signed errors, not averaged per line.
 - **Reconciliation sheet** compares each workbook cell to an expected value taken from the SQL analysis analytical views, with tolerances of 0 for counts, 0.5 for USD and 1e-6 for ratios.
 
-Formula definitions are in [FINANCIAL_METRICS_AND_METHODOLOGY.md](FINANCIAL_METRICS.md).
+Formula definitions are in [FINANCIAL_METRICS.md](FINANCIAL_METRICS.md).
 
 ## 5. Using the workbook
 
@@ -71,6 +71,8 @@ Formula definitions are in [FINANCIAL_METRICS_AND_METHODOLOGY.md](FINANCIAL_METR
 4. Filter tables with the Basis or Section columns rather than editing cells.
 5. If you change an adjustable input (amber cell), re-check **Reconciliation & QA**; checks tied to the original input are expected to fail.
 6. Do not paste values over formulas; the checks depend on the links.
+
+**Rebuilding it (optional).** Prerequisites: `pip install -r requirements.txt`, the SQL analysis database and the regenerated analysis documents ([HOW_TO_RUN.txt](../HOW_TO_RUN.txt), steps 3-4); LibreOffice only for the 2 recalculation tests. Commands (Windows: use backslashes in paths): `python src/excel_workbook_builder.py`, then `python -m pytest tests/test_excel_workbook.py -q`. Expected: the builder prints the workbook path, `formulas 3819` and `reconciliation 137/137 PASS`; the tests report 0 failures. Common failures: exit 1 when the database or documents are missing; exit 2 when the SQL hand-off fails its gates (manifest hash, row count or a validation row). The rebuilt file carries a new timestamp, so it is not byte-identical to the committed workbook.
 
 ## 6. Verification that was performed
 

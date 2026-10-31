@@ -24,7 +24,7 @@ The cleaner turns a 43-column text extract into a 192-column analytical file **w
 | Coverage | Six legal entities, five divisions, January 2023 to December 2025 (36 periods; 0 entity-period gaps) | Verified |
 | Content mix | P&L and balance-sheet lines in one file: 145,534 P&L-labelled rows and 7,148 balance-sheet-labelled rows | Verified |
 | Observed `source_system` labels | SAP, Oracle, Excel upload, NetSuite, Tally (SAP also appears with a trailing space in 2,038 raw rows). The actual originating platforms have not been independently authenticated | Labels Verified; origin Unverified |
-| Provenance | Source, creator, generation date, licence: **not recorded** | Unresolved |
+| Provenance | Created by the project owner for this portfolio project (**Owner-stated**). Generator, tool, random seed and creation date: **not recorded**. Licence: none. See [DATA_PROVENANCE.md](DATA_PROVENANCE.md) | Owner-stated; remainder Not recorded |
 
 Raw rows that are not postings: 350 rows with `notes` = `subtotal row` (TOTAL, Subtotal and CHECK labels).
 
@@ -108,7 +108,7 @@ Parentheses and a leading minus mean negative; `$` and surrounding spaces are to
 
 ## 10. Entity and statement eligibility
 
-- **Junk and unresolved entities.** `TEST ENTITY`, `Do not use`, `xxx` (by name) and codes `99` and `T999` (by code) mark 204 rows in total (173 by name, 144 by code); 16 further rows have neither a code nor a name and cannot be resolved. These are excluded, not deleted. Earlier project scoping documents quote 173 (names only); the cleaner's union of name and code is 204. Only `TEST ENTITY` is owner-confirmed as non-reporting; `Do not use` and `xxx` are an Assumption.
+- **Junk and unresolved entities.** `TEST ENTITY`, `Do not use`, `xxx` (by name) and codes `99` and `T999` (by code) mark 204 rows in total. The overlap, counted from `junk_entity_basis` in the cleaned CSV (**Verified**): **60 rows are junk by name only, 113 by name and code, 31 by code only**. So 60 + 113 = 173 by name, 113 + 31 = 144 by code, and the union is 60 + 113 + 31 = 204. Early scoping documents quote 173 because they counted names only. All 204 are posting rows. 16 further rows have neither a code nor a name and cannot be resolved. These are excluded, not deleted. Only `TEST ENTITY` is owner-confirmed as non-reporting; `Do not use` and `xxx` are an Assumption.
 - **Statements.** Ten raw labels are normalised to two: P&L (145,534 rows) and Balance Sheet (7,148 rows). A balance-sheet line is out of scope for a P&L metric and the reverse (7,125 balance-sheet rows are excluded from the P&L population after earlier gates). The two are never added together. The measurement basis of balance-sheet lines (opening, closing or movement) is **Unresolved**.
 
 ## 11. Journal statuses
@@ -143,7 +143,21 @@ For P&L actual the reasons are: non-posting 350; junk entity 204; entity unresol
 
 ## 14. Row preservation and integrity
 
-152,682 raw rows = 152,682 cleaned rows. The `row_id` sets are identical, order is preserved, the raw-value columns are preserved byte for byte, and the raw file's hash was recomputed after the run and unchanged. The reconciliation from 152,682 source rows to the dashboard populations is in QA_AND_VALIDATION_SUMMARY.md.
+152,682 raw rows = 152,682 cleaned rows. The `row_id` sets are identical, order is preserved, the raw-value columns are preserved byte for byte, and the raw file's hash was recomputed after the run and unchanged. The reconciliation from 152,682 source rows to each reporting population is in [`excel/data_lineage_reconciliation.xlsx`](../excel/data_lineage_reconciliation.xlsx).
+
+### Reproducibility of the cleaned CSV across CPUs (investigated 31 Oct 2026)
+
+The 192-column cleaned CSV is not stored in the repository; it is regenerated from the raw file. Its approved SHA-256 is `c184b677bacc6f23086e3b5eedd71836643cb75064e428a1ebfee4c075fa9b47` (174,545,248 bytes). On GitHub-hosted Ubuntu runners the same code, Python 3.13 and pinned packages produced that exact file on AMD EPYC 9V45 CPUs but a different file (SHA-256 `b27dd0f74ad7…`, 73 bytes larger) on AMD EPYC 7763 CPUs. The cause was investigated rather than assumed:
+
+| Finding | Evidence (all **Verified**) |
+|---|---|
+| Rows, row order, columns and header | Identical: 152,682 rows, 192 columns, same order. |
+| Columns that differ | Exactly **2 of 192**: `price_identity_log10_ratio` (10,332 cells) and `row_log10_magnitude` (3,739 cells). The other 190 columns, including every flag, scale decision and eligibility column, are identical. Empty cells are the same. |
+| Size of the differences | At most 4 ulp (relative 5.8e-16) in the first column and 15 ulp (relative 2.1e-15) in the second. 17,258 data lines contain at least one such cell. |
+| Cause | Both columns are computed with `numpy.log10`. The EPYC 7763 runners use numpy's AVX2 code path (AVX-512 not found) and the EPYC 9V45 runners and the reference environment use AVX-512, whose `log10` rounds the last digit differently. This is a **serialization-level floating-point difference, not a data difference**. (Observed in 10 diagnostic CI jobs: in the run that recorded the CPU model, the 4 EPYC 7763 jobs all differed and the 2 EPYC 9V45 jobs all matched; the run that compared columns had 2 differing and 2 matching jobs. The instruction-set explanation is the likely mechanism, not separately proven.) |
+| Effect on results | None observed: the SQL pipeline's 289 validation rows all passed on a CSV produced by a 7763 runner. The two columns are diagnostics for scale decisions; no decision changed. |
+
+**How the project handles it.** The byte-exact hash remains the primary gate. If, and only if, it fails, `src/sql_analysis_pipeline.py` accepts the file when its **normalised hash** matches: the same CSV re-serialised with those two columns rounded to 8 significant digits (`NORMALISED_SHA256 = 7ceb8caf…`). That acceptance is never silent: the pipeline prints a warning and reports `sha_status = "normalised"`. Any other difference (another column, a visible digit, a row) still stops the run. Rounding at 8 digits has a small chance of straddling a rounding boundary for a 1-15 ulp difference (estimated below 0.1% per regeneration); that would fall back to a hard failure, never to a silent pass. No calculation, source value or validation threshold was changed.
 
 ## 15. What cleaning did not resolve
 
@@ -155,6 +169,6 @@ For P&L actual the reasons are: non-posting 350; junk entity 204; entity unresol
 | FX zero and non-1.0 rates | Not repaired |
 | Scale ground truth and list prices | Restoration is provisional; as-reported amounts retained |
 | Budget, forecast and prior-year summability per line | Assumed summable per line (project convention) |
-| Provenance and licence | Not recorded |
+| Dataset provenance beyond the owner statement (generator, seed, creation date) | Not recorded; the repository has no licence |
 
 The full register, with what cannot be concluded and what evidence would resolve each item, is [ASSUMPTIONS_LIMITATIONS_AND_RISKS.md](ASSUMPTIONS_LIMITATIONS_AND_RISKS.md).

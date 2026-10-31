@@ -4,8 +4,12 @@ Reads (read-only):  build/fpa_analysis.duckdb, build/sql_results/*.csv, docs/INS
 Template:           src/dashboard_template.html   (contains the single placeholder  /*__PAYLOAD__*/null)
 Writes:             dashboard/fpa_financial_analytics_dashboard.html  (+ payload_stats.json)
 
-Nothing is cleaned, deduplicated, imputed, dropped or sign-flipped here: the 58,340 eligible P&L lines of
-v_pl_actual are exported one-for-one. Aggregation happens in the browser.
+Nothing is cleaned, deduplicated, imputed, dropped or sign-flipped here. Two line-grain populations are exported one-for-one
+and aggregation happens in the browser:
+  * the 58,340 Posted-eligible P&L actual lines of v_pl_actual (the default dashboard scope), and
+  * the other lines of the any-status P&L population (v_pl_actual_any_status, 136,330 lines in total), i.e. the 77,990
+    non-Posted lines, so that status diagnostics honour every filter and scenario.
+So the published HTML embeds 136,330 line-level records, of which 58,340 are in the default view.
 Run:  python src/dashboard_builder.py
 """
 from __future__ import annotations

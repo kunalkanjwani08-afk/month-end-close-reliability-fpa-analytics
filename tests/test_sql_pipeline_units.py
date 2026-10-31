@@ -81,6 +81,43 @@ def test_duplicate_header_names_stop(tmp_path):
         pp.verify_input(f, expected_sha=pp.sha256_file(f), expected_rows=0)
 
 
+# ------------------------------------------------------------------------------------ normalised-hash fallback (integrity gate)
+def _variant_csv(path: Path, price_ratio: str, magnitude: str, other: str = "x") -> Path:
+    path.write_text("a,price_identity_log10_ratio,row_log10_magnitude\n"
+                    f"{other},{price_ratio},{magnitude}\n2,,5.123456789012345\n", encoding="utf-8")
+    return path
+
+
+def test_normalised_hash_ignores_last_digit_float_noise_only(tmp_path):
+    import numpy as np
+    base = _variant_csv(tmp_path / "base.csv", "-3.0000856309061112", "2.718281828459045")
+    x1, x2 = -3.0000856309061112, 2.718281828459045
+    noisy = _variant_csv(tmp_path / "noisy.csv", repr(float(np.nextafter(x1, 0))), repr(float(np.nextafter(x2, 9))))
+    assert pp.sha256_file(base) != pp.sha256_file(noisy)                         # byte hash sees the 1-ulp difference
+    assert pp.normalised_sha256(base) == pp.normalised_sha256(noisy)            # the documented fallback does not
+    # a real change must still be detected: another cell, a visible digit of a variant column, or an extra row
+    assert pp.normalised_sha256(base) != pp.normalised_sha256(_variant_csv(tmp_path / "c1.csv", "-3.0000856309061112", "2.718281828459045", other="y"))
+    assert pp.normalised_sha256(base) != pp.normalised_sha256(_variant_csv(tmp_path / "c2.csv", "-3.0001856309061112", "2.718281828459045"))
+    assert pp.normalised_sha256(base) != pp.normalised_sha256(_variant_csv(tmp_path / "c3.csv", "-3.0000856309061112", "2.718291828459045"))
+
+
+def test_verify_input_reports_how_the_hash_matched(tmp_path, monkeypatch):
+    import numpy as np
+    base = _variant_csv(tmp_path / "base.csv", "-3.0000856309061112", "2.718281828459045")
+    noisy = _variant_csv(tmp_path / "noisy.csv", repr(float(np.nextafter(-3.0000856309061112, 0))), "2.718281828459045")
+    header = ["a", "price_identity_log10_ratio", "row_log10_magnitude"]
+    monkeypatch.setattr(pp, "EXPECTED_HEADER_SHA256", __import__("hashlib").sha256("\n".join(header).encode()).hexdigest())
+    monkeypatch.setattr(pp, "REQUIRED_FIELDS", header)
+    kw = dict(expected_sha=pp.sha256_file(base), expected_rows=2, expected_cols=3, expected_normalised=pp.normalised_sha256(base))
+    assert pp.verify_input(base, **kw)["sha_status"] == "exact"
+    assert pp.verify_input(noisy, **kw)["sha_status"] == "normalised"        # accepted, but reported as not byte-identical
+    with pytest.raises(pp.IntegrityError, match="mismatch"):                  # without the fallback the same file is refused
+        pp.verify_input(noisy, **{**kw, "expected_normalised": None})
+    changed = _variant_csv(tmp_path / "chg.csv", "-3.0000856309061112", "2.718281828459045", other="y")
+    with pytest.raises(pp.IntegrityError, match="something else differs"):
+        pp.verify_input(changed, **kw)
+
+
 # ------------------------------------------------------------------------------------------------ sign category
 SIGN_CASES = [
     (5.0, 3.0, "SAME_SIGN_NONZERO"), (-5.0, -3.0, "SAME_SIGN_NONZERO"),

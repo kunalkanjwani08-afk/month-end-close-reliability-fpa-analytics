@@ -1,0 +1,15 @@
+# Dependabot opens pull requests for newer GitHub Actions (pinned to commit SHAs in ci.yml) and for the pinned Python packages.
+# It never merges anything. Because the published results were produced with the exact versions in requirements.txt, a package
+# update must be validated (fixture tests, SQL pipeline, full-data tests) before it is accepted.
+version: 2
+updates:
+  - package-ecosystem: github-actions
+    directory: /
+    schedule:
+      interval: monthly
+    open-pull-requests-limit: 3
+  - package-ecosystem: pip
+    directory: /
+    schedule:
+      interval: monthly
+    open-pull-requests-limit: 3

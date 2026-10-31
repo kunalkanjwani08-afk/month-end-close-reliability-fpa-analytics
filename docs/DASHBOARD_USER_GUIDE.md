@@ -2,7 +2,7 @@
 
 **Month-End Close Reliability & Financial Performance Analytics**
 
-> **Data:** fictional NovaBridge Industries; owner-described as synthetic. The dashboard embeds line-level data and should not be shared until provenance, licence and sensitivity are reviewed.
+> **Data:** fictional NovaBridge Industries; created by the project owner as synthetic data (Owner-stated). The dashboard embeds line-level records of that synthetic dataset and is published in this public repository. The repository has no licence, so default copyright applies: it may be viewed, not reused.
 > **Evidence labels:** Verified / Owner-stated / Assumption / Unresolved.
 > **Testing boundary:** tested in headless **Chromium** only (Dashboard and independent validation). Not tested: Firefox, Safari, screen readers or other assistive technology, a physical printer, Microsoft Excel (not relevant here), Windows.
 
@@ -21,6 +21,9 @@ It lets a reviewer explore the SQL analysis results under filters and assumption
 1. Double-click the file, or open it from a browser's File menu. A current Chromium-based browser is the only environment tested.
 2. No server, install or internet connection is needed. Page load in headless Chromium was about 0.5–0.7 s on the Linux test machine (one run; not a benchmark).
 3. If the page shows no data, the browser has blocked scripts for local files; try another Chromium-based browser. This has not been tested in other browsers.
+4. GitHub shows the HTML as source code and does not run it. Download the file (*Download raw file*) or clone the repository, then open it locally. There is no hosted live demo.
+
+**Rebuilding it (optional).** Prerequisites: the SQL analysis database (`python src/sql_analysis_pipeline.py`, see [HOW_TO_RUN.txt](../HOW_TO_RUN.txt)) and `pip install -r requirements.txt`. Command: `python src/dashboard_builder.py` (Windows: `python src\dashboard_builder.py`). Expected: it prints the payload statistics (58,340 Posted-eligible lines plus 77,990 non-Posted lines) and rewrites `dashboard/fpa_financial_analytics_dashboard.html` (about 7.3 MB). If `build/fpa_analysis.duckdb` is missing it stops with an error: run the SQL pipeline first. The browser tests (`tests/dashboard_browser_qa.py`, `tests/dashboard_negative_controls.py`) are manual and need Playwright 1.56.0 with Chromium.
 
 ## 3. Layout
 
@@ -117,7 +120,7 @@ Not shown because the data cannot support them: DSO, DPO, working capital, close
 
 ## 11. How it was verified
 
-| Check | Result | Source |
+| Check | Result | Source (historical reports are not stored in the repository; the test scripts are) |
 |---|---|---|
 | Dashboard browser suite | 297 PASS / 0 FAIL / 1 SKIP of 298 | Dashboard report |
 | Dashboard negative controls | 6 of 6 re-introduced defects detected | Dashboard report |
@@ -133,11 +136,11 @@ Selection consistency was tested in 17 specific states, **not every possible fil
 - **Firefox, Safari** and any browser other than Chromium.
 - **Screen readers and other assistive technology.** Keyboard operation (tab arrows, Enter and Space on bars) and ARIA roles, names and states were asserted programmatically and by keyboard tests, but no accessibility audit or assistive-technology test was done, so this guide makes no accessibility claim.
 - **A physical printer.**
-- **Windows** and a clean-machine run.
+- **Windows** (the dashboard HTML itself is a static file; the builder and browser tests were run on Linux only).
 - Every possible filter combination.
 
 ## 13. Limitations
 
-- Line-level amounts for 136,330 lines and document numbers for 58,340 lines are embedded in the HTML. The file does not embed user IDs or cost-centre owner names. It must not be shared until provenance and licence are resolved.
+- Line-level amounts for 136,330 lines and document numbers for 58,340 lines are embedded in the HTML. The file does not embed user IDs or cost-centre owner names. Because the repository has no licence, reuse of the file requires the owner's permission.
 - All values are provisional and describe a simulated extract.
 - The 4,996-line hidden population (section 8) is documented but not shown.

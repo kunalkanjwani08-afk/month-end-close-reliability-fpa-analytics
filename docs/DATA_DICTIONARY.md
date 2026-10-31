@@ -3,11 +3,11 @@
 Source file: `data/raw/fpa_monthly_close_raw_messy.csv` (43 columns, 152,682 data rows, SHA-256 in [DATA_PROVENANCE.md](DATA_PROVENANCE.md)).
 Related: [FINANCIAL_METRICS.md](FINANCIAL_METRICS.md) (rules and formulas).
 
-**Status of this document: draft for review.** Nothing here has been confirmed by a source system owner or a vendor data dictionary. None of it has been implemented in code.
+**Scope of this document:** the 43 columns of the **raw** extract. Business meanings are **Inferred** unless marked Owner-stated; no source-system owner or vendor dictionary exists to confirm them, because the data is synthetic. The rules that turn these 43 columns into the 192 cleaned columns are implemented in `src/clean_fpa_monthly_close.py` and described in [DATA_AND_CLEANING_METHODOLOGY.md](DATA_AND_CLEANING_METHODOLOGY.md); the 192 cleaned columns are listed in the `Schema_Map` sheet of `data/processed/fpa_monthly_close_cleaned.xlsx`.
 
 ## How to read this document
 
-- **Observed** facts (counts, formats, example values) were measured on the whole file on 2026-10-28 with an ad-hoc read-only script that is not committed. They describe the raw file and are reproducible.
+- **Observed** facts (counts, formats, example values) were measured on the whole raw file on 2026-10-28 with an ad-hoc read-only profiling script that is not in the repository, so the profile itself cannot be re-run from the repository (the cleaner's own column profile, `Column_Profile` sheet and `QC_Report.txt`, can). They describe the raw file.
 - **Meaning status** applies only to the business meaning:
   - **Owner-stated**: the project owner said so in the project brief.
   - **Inferred**: guessed from the column name and the observed values. Not confirmed.
@@ -26,7 +26,7 @@ Every column is stored as text in the raw file. Do not assume that a numeric-loo
 | P&L and balance sheet | Mixed in one file. 145,534 rows carry a P&L-family `statement` label, 7,148 a balance-sheet label. |
 | Scenarios | Actual, budget, forecast and prior year are separate columns on the same row, not separate rows. |
 | Non-posting rows | 350 rows have `notes` = `subtotal row` (totals, subtotals, check rows). |
-| Junk entities | 173 rows carry a `legal_entity` of `Do not use`, `xxx` or `TEST ENTITY`. |
+| Junk entities | 173 rows carry a raw `legal_entity` of `Do not use`, `xxx` or `TEST ENTITY`. The cleaner also excludes entity codes `99` and `T999`; the union by name or code is **204 rows** (60 by name only, 113 by name and code, 31 by code only). |
 | Time fields | `posting_date` is the only date column. There is no close start, close end, deadline or approval timestamp. |
 
 ## Identity and source
@@ -107,6 +107,5 @@ All amount columns are text. Formats seen: plain decimals, thousands separators 
 ## Gaps in this dictionary
 
 - No source documentation exists in the repository, so every meaning marked Inferred should be confirmed by whoever produced the file.
-- Column 24 to 29 parsing rules and the 288 `fiscal_period` mappings are not yet written.
-- The `legal_entity`, `division`, `cost_center` and `account_name` mapping tables are not yet written.
+- The parsing rules for columns 24 to 29 and the `fiscal_period`, `legal_entity`, `division`, `cost_center` and `account_name` mappings are implemented in the cleaning script; their evidence is in the `Mappings`, `Amount_Parse_Evidence` and `Date_Resolution` sheets of the cleaned workbook. They are not written out column by column in this document.
 - Counts in this document describe the file as received and will change only if the raw file changes. Its hash is recorded in DATA_PROVENANCE.md.

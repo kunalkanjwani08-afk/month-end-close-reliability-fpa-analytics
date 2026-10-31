@@ -1,61 +1,124 @@
-HOW TO RUN THE NOVABRIDGE PROJECT  (Windows / VS Code terminal; Linux/macOS commands in brackets)
+HOW TO RUN THE NOVABRIDGE PROJECT
+=================================
 
-Everything named below is in this repository. Large data files are stored compressed or are regenerated, see step 0.
+Commands are given for Windows (PowerShell in the VS Code terminal) first, then for Linux / macOS / Git Bash. CI (GitHub Actions)
+runs on Ubuntu. Only Linux has been tested; Windows is NOT TESTED (see "What has and has not been tested" at the end).
 
-0. DATA
-   a) Raw data - decompress once (lossless; the result is byte-identical to the original extract):
-        Windows (needs only Python):
-          python -c "import gzip,shutil;shutil.copyfileobj(gzip.open('data/raw/fpa_monthly_close_raw_messy.csv.gz','rb'),open('data/raw/fpa_monthly_close_raw_messy.csv','wb'))"
-        Linux / macOS / Git Bash:   gunzip -k data/raw/fpa_monthly_close_raw_messy.csv.gz
-      Expected SHA-256 of the decompressed file:
-        a0e6eddde25280aa27a60c5955743d3243b14138d876eedac0547e24a1cc6fff
-      Check it:  python -c "import hashlib,sys;print(hashlib.sha256(open(sys.argv[1],'rb').read()).hexdigest())" data/raw/fpa_monthly_close_raw_messy.csv
+The 192-column cleaned CSV is not stored in the repository (174.5 MB). It is regenerated from the raw file in step 2.
+Everything under build\ is generated and git-ignored.
 
-   b) Cleaned data - the repository publishes the cleaned dataset as an Excel workbook:
-        data/processed/fpa_monthly_close_cleaned.xlsx      (Cleaned_Data sheet: 152,682 rows x 77 columns, plus audit sheets)
-      The SQL analysis needs the full 192-column CSV version of the same cleaned data (eligibility flags, scale adjustments).
-      The CSV is not stored in the repository; regenerate it from the raw file with the cleaning script (about 4-5 minutes):
-          python src/clean_fpa_monthly_close.py --output-dir data/processed
-      Its SHA-256 must be:
-        c184b677bacc6f23086e3b5eedd71836643cb75064e428a1ebfee4c075fa9b47
-      (The same run rewrites the cleaned workbook, QC_Report.txt and qc_summary.json. The cleaned workbook content is identical;
-       only its generation timestamp and input path change.)
-      Without --output-dir the script writes to <your Downloads>\fpa_monthly_close_cleaned\, which the pipeline does not read.
 
-1. ENVIRONMENT (Python 3.11 or newer)
-     python -m venv .venv
-     .venv\Scripts\activate            [source .venv/bin/activate]
-     pip install -r requirements.txt
+PREREQUISITES
+  * Python 3.11 or newer. The published results were produced on Python 3.13.16; CI uses 3.13.
+  * About 2 GB of free memory for the cleaning step (peak about 1.25 GB) and about 1 GB of free disk space.
+  * git, if you clone the repository (or download the ZIP from GitHub).
+  * Optional, for the manual QA steps only: LibreOffice (soffice on the PATH) for 2 Excel tests; Playwright 1.56.0 with
+    Chromium for the dashboard browser tests (pip install playwright==1.56.0, then: playwright install chromium).
 
-2. SQL ANALYSIS - build, validate and export (about 20-30 seconds)
-     python src\sql_analysis_pipeline.py
-   Exit code 0 = all 55+24+86+124 checks passed. Results: build\sql_results\*.csv + MANIFEST.json, database build\fpa_analysis.duckdb
-   (both git-ignored; they are rebuilt on demand).
-   Exit code 1 = missing/invalid input.  Exit code 2 = integrity/validation failure.
-   On failure nothing accepted is overwritten; diagnostics go to build\sql_results_failed_run\ and build\fpa_analysis.duckdb.failed.
 
-3. ANALYSIS DOCUMENTS - regenerate from the validated database
-     python src\analysis_report_builder.py
-   Writes docs\FINANCIAL_ANALYSIS_REPORT.md and docs\INSIGHT_REGISTER.md.
+STEP 0 - ENVIRONMENT
+  Windows (PowerShell, from the repository root):
+      py -m venv .venv
+      .venv\Scripts\Activate.ps1          # if blocked: Set-ExecutionPolicy -Scope Process Bypass
+      python -m pip install -r requirements.txt
+      python -m pip check                 # expected: "No broken requirements found."
+  Linux / macOS / Git Bash:
+      python3 -m venv .venv && source .venv/bin/activate
+      pip install -r requirements.txt && pip check
 
-4. TESTS (about 80 seconds with the cleaned CSV, 2 seconds without)
-     python -m pytest tests -q --ignore=tests\test_excel_workbook.py
-   Without the cleaned CSV only the fixture tests run and the run is reported INCOMPLETE (non-zero exit).
-   The Excel tests are run in step 5 because they compare the database hash recorded in the workbook; the DuckDB file is not
-   byte-identical between rebuilds (its content is).
+  requirements.txt pins the exact versions of the tested environment (pandas 3.0.5, numpy 2.4.6, openpyxl 3.1.5,
+  XlsxWriter 3.2.9, duckdb 2.0.0, pytest 9.2.0). It is a pin list, not a full lock file: transitive dependencies
+  (python-dateutil, tzdata, ...) are resolved by pip at install time.
 
-5. EXCEL WORKBOOK (a few seconds; needs the database from step 2 and the documents from step 3)
-     python src\excel_workbook_builder.py
-     python -m pytest tests\test_excel_workbook.py -q
-     python src\excel_workbook_builder.py --qa-report
-   Output: excel\fpa_month_end_close_analysis.xlsx (plus MANIFEST.json and EXCEL_QA_REPORT.md, git-ignored).
-   LibreOffice (soffice) is needed for 2 tests; without it they are skipped and the run is reported INCOMPLETE.
-   The workbook has not been opened in Microsoft Excel.
 
-6. DASHBOARD
-     python src\dashboard_builder.py
-   Rebuilds dashboard\fpa_financial_analytics_dashboard.html. It needs the raw CSV (step 0a), the cleaned CSV (step 0b) and the
-   workbook manifest (step 5) only to record their hashes in the page. Open the HTML in a browser: no server, no network.
-   Optional browser tests (need Playwright + Chromium):  python tests\dashboard_browser_qa.py
+STEP 1 - DECOMPRESS AND CHECK THE RAW DATA (lossless; the result is byte-identical to the original extract)
+  Windows (needs only Python):
+      python -c "import gzip,shutil;shutil.copyfileobj(gzip.open('data/raw/fpa_monthly_close_raw_messy.csv.gz','rb'),open('data/raw/fpa_monthly_close_raw_messy.csv','wb'))"
+      Get-FileHash -Algorithm SHA256 data\raw\fpa_monthly_close_raw_messy.csv
+  Linux / macOS / Git Bash:
+      gunzip -k data/raw/fpa_monthly_close_raw_messy.csv.gz
+      sha256sum data/raw/fpa_monthly_close_raw_messy.csv
+  Expected SHA-256: a0e6eddde25280aa27a60c5955743d3243b14138d876eedac0547e24a1cc6fff   (51,938,535 bytes)
+  If it differs: do not continue; re-download the .gz. The cleaner refuses to run on any other file.
 
-Nothing here commits, pushes or publishes anything. Built and tested on Linux; not yet run on Windows.
+
+STEP 2 - CLEAN THE RAW DATA (about 4-5 minutes)
+      python src/clean_fpa_monthly_close.py --output-dir data/processed
+  (Windows: src\clean_fpa_monthly_close.py)
+  Expected: the log ends with "Validation: 43 in-memory + 27 read-back checks, 0 FAILED" and these files exist in data/processed:
+      fpa_monthly_close_cleaned.csv        192 columns, 152,682 rows, 174,545,248 bytes (git-ignored)
+      fpa_monthly_close_cleaned.xlsx       review workbook (77 columns, 21 sheets)
+      fpa_monthly_close_cleaned_cell_audit.csv, QC_Report.txt, qc_summary.json, run_log.txt
+  NOTE - this run OVERWRITES three tracked files with equivalent content and a new timestamp: the cleaned workbook,
+  QC_Report.txt and qc_summary.json. To restore the published versions afterwards:
+      git restore data/processed/fpa_monthly_close_cleaned.xlsx data/processed/QC_Report.txt data/processed/qc_summary.json
+  Without --output-dir the script writes to a folder in your Downloads directory, which the later steps do not read.
+
+  Is the CSV identical to the reference? Expected SHA-256 of the CSV:
+      c184b677bacc6f23086e3b5eedd71836643cb75064e428a1ebfee4c075fa9b47
+  This is the byte-exact hash on the reference environment and on CPUs with AVX-512. On CPUs without AVX-512 (observed on
+  GitHub's AMD EPYC 7763 runners) numpy's log10 differs in the last digits of TWO columns (price_identity_log10_ratio,
+  row_log10_magnitude; 14,071 cells, all other 190 columns identical), so the byte hash differs. The SQL pipeline then accepts
+  the file ONLY if its normalised hash matches (those two columns rounded to 8 significant digits) and prints a WARNING.
+  Any other difference stops the run. Details: docs/DATA_AND_CLEANING_METHODOLOGY.md, section 14.
+
+
+STEP 3 - SQL ANALYSIS: build, validate, export (about 20-30 seconds)
+      python src/sql_analysis_pipeline.py
+  Expected: "[1/4] input verified (exact)" (or "(normalised)" plus a WARNING), "independent pandas cross-check: 124 figures
+  recomputed", "[4/4] validated and promoted 72 output tables" and "FINISHED". Exit code 0 means all 55 + 24 + 86 + 124 = 289
+  validation rows passed. Results: build\sql_results\*.csv + MANIFEST.json; database build\fpa_analysis.duckdb.
+  Exit code 1 = missing or invalid input (usually step 2 was not run, or the CSV is not in data\processed).
+  Exit code 2 = integrity / validation failure: nothing accepted is overwritten; diagnostics go to build\sql_results_failed_run\
+  and build\fpa_analysis.duckdb.failed. Do not edit thresholds to make it pass; read the "VALIDATION FAIL" lines.
+
+
+STEP 4 - ANALYSIS DOCUMENTS (regenerate from the validated database)
+      python src/analysis_report_builder.py
+  Writes docs/FINANCIAL_ANALYSIS_REPORT.md and docs/INSIGHT_REGISTER.md. These two files are GENERATED: change the generator,
+  not the Markdown. With the same database they are byte-identical to the committed versions.
+
+
+STEP 5 - TESTS
+  Fast fixture tests (no data needed, about 3 seconds):
+      python -m pytest tests/test_sql_pipeline_units.py -q
+  Full-data tests (need the CSV from step 2; about 90 seconds). Skipped tests are reported INCOMPLETE with a non-zero exit:
+      python -m pytest tests -q --ignore=tests/dashboard_browser_qa.py --ignore=tests/dashboard_negative_controls.py
+  Run the Excel build (step 6) BEFORE the Excel tests: they compare the database hash recorded in the workbook, and the DuckDB
+  file is not byte-identical between rebuilds (its content is; see ISS-02 in excel/issue_log.xlsx). LibreOffice is needed for
+  2 Excel tests; without it they are skipped and the run is reported INCOMPLETE.
+
+
+STEP 6 - EXCEL WORKBOOK (a few seconds; needs steps 3 and 4)
+      python src/excel_workbook_builder.py
+      python -m pytest tests/test_excel_workbook.py -q
+      python src/excel_workbook_builder.py --qa-report
+  Output: excel/fpa_month_end_close_analysis.xlsx (12 sheets, 3,819 formulas, 137 reconciliation checks, all PASS), plus
+  MANIFEST.json and EXCEL_QA_REPORT.md (git-ignored). The workbook is rebuilt with a new timestamp each time, so it differs
+  byte-wise from the committed copy; `git restore excel/fpa_month_end_close_analysis.xlsx` returns the published file.
+  The workbook has not been opened in Microsoft Excel (NOT TESTED).
+
+
+STEP 7 - DASHBOARD
+      python src/dashboard_builder.py
+  Rebuilds dashboard/fpa_financial_analytics_dashboard.html (needs the database from step 3). Open the HTML in a browser:
+  no server, no network. MANUAL browser tests (not run by CI; need Playwright + Chromium, the CSV and the workbook):
+      python tests/dashboard_browser_qa.py
+      python tests/dashboard_negative_controls.py
+
+
+WHAT RUNS AUTOMATICALLY AND WHAT IS MANUAL
+  GitHub Actions (.github/workflows/ci.yml) runs on every push and pull request to main:
+    1. compileall + the fixture tests (tests/test_sql_pipeline_units.py).
+    2. Full-data reproduction: gunzip -> cleaner -> SQL pipeline -> tests/test_sql_pipeline.py (full-data SQL and
+       cross-check tests).
+  NOT run by CI (manual, steps 5-7): the Excel build and tests/test_excel_workbook.py (LibreOffice), the dashboard builder and
+  the Playwright browser tests.
+
+
+WHAT HAS AND HAS NOT BEEN TESTED
+  Tested on Linux (Ubuntu / a Linux container): all steps above, in a fresh virtual environment built from requirements.txt.
+  NOT TESTED: Windows, macOS, Python versions other than 3.13, native Microsoft Excel, Firefox, Safari, screen readers,
+  a physical printer. The Windows commands above follow the same steps but have never been executed.
+
+Nothing here commits, pushes or publishes anything.
