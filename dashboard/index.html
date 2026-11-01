@@ -14,17 +14,55 @@
 <meta property="og:image:height" content="627">
 <meta name="twitter:card" content="summary_large_image">
 <style>
-body{font-family:system-ui,Segoe UI,Arial,sans-serif;margin:0;min-height:100vh;display:grid;place-items:center;background:#0b1f3a;color:#fff;text-align:center;padding:24px}
-a.btn{display:inline-block;margin-top:18px;padding:14px 26px;background:#2f6fe4;color:#fff;border-radius:10px;font-weight:700;text-decoration:none}
-p{color:#c9d9f2}
+:root{--bg:#f4f7fb;--ink:#0b1f3a;--mut:#4a5b75;--card:#fff;--line:#d9e2ef;--accent:#2f6fe4}
+@media (prefers-color-scheme:dark){:root{--bg:#0b1522;--ink:#eaf1fb;--mut:#a9bad3;--card:#12233a;--line:#223654}}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:system-ui,Segoe UI,Arial,sans-serif;line-height:1.55}
+header{background:linear-gradient(120deg,#0b1f3a,#12396b);color:#fff;padding:40px 20px 34px}
+.wrap{max-width:980px;margin:0 auto;padding:0 20px}
+header .wrap{padding:0}
+h1{margin:0 0 8px;font-size:clamp(26px,5vw,40px)}
+header p{margin:0;color:#c9d9f2;max-width:720px}
+.btns{display:flex;flex-wrap:wrap;gap:12px;margin-top:22px}
+a.btn{display:inline-block;padding:13px 22px;border-radius:10px;font-weight:700;text-decoration:none;background:var(--accent);color:#fff}
+a.btn.alt{background:transparent;border:1px solid #ffffff66}
+.note{font-size:14px;color:#c9d9f2;margin-top:12px}
+main{padding:28px 0 60px}
+.kpis{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:14px;margin:0 0 28px}
+.kpi{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:16px}
+.kpi b{display:block;font-size:26px}
+.kpi span{color:var(--mut);font-size:14px}
+h2{margin:30px 0 10px}
+figure{margin:0 0 26px;background:var(--card);border:1px solid var(--line);border-radius:12px;padding:12px}
+figure img{width:100%;height:auto;display:block;border-radius:8px}
+figcaption{color:var(--mut);font-size:14px;margin-top:8px}
+.limits{color:var(--mut);font-size:14px}
 </style>
 </head>
 <body>
-<main>
+<header><div class="wrap">
 <h1>NovaBridge Close &amp; Performance Dashboard</h1>
-<p>Opening the interactive dashboard (7 MB, may take a few seconds to load)&hellip;</p>
-<a class="btn" href="fpa_financial_analytics_dashboard.html">Open the dashboard</a>
-</main>
-<script>setTimeout(function(){location.replace("fpa_financial_analytics_dashboard.html")},600);</script>
+<p>Month-end close and FP&amp;A analytics on a messy 152,682-line ledger extract: nine tabs with filters, budget variance, forecast, drivers, data quality and CSV export. Built by Kunal Kanjwani. Data is synthetic.</p>
+<div class="btns">
+<a class="btn" href="fpa_financial_analytics_dashboard.html" target="_blank" rel="noopener">Open the live interactive dashboard</a>
+<a class="btn alt" href="https://github.com/kunalkanjwani08-afk/month-end-close-reliability-fpa-analytics" target="_blank" rel="noopener">View code on GitHub</a>
+</div>
+<p class="note">The live dashboard is one large file (about 2.3 MB compressed) and can take a little while to open on a slow connection. A desktop browser works best. The screenshots below load immediately.</p>
+</div></header>
+<main><div class="wrap">
+<div class="kpis">
+<div class="kpi"><b>$202.65M</b><span>Revenue, Posted journals only</span></div>
+<div class="kpi"><b>$471.58M</b><span>Revenue if every status is counted</span></div>
+<div class="kpi"><b>58,340</b><span>of 152,682 lines qualify for the reported P&amp;L</span></div>
+<div class="kpi"><b>459 / 459</b><span>baseline checks pass in the dashboard</span></div>
+</div>
+<h2>Executive overview</h2>
+<figure><img src="screenshots/desktop_overview.png" alt="Dashboard executive overview, light theme" loading="lazy" width="1440" height="2107"><figcaption>Revenue, cost base, result proxy and budget variance, with filters by year, quarter, entity, division, GL account and cost centre.</figcaption></figure>
+<h2>Budget variance</h2>
+<figure><img src="screenshots/desktop_variance.png" alt="Dashboard budget variance tab, light theme" loading="lazy" width="1440" height="2994"><figcaption>Actual versus budget, with the comparison population shown explicitly.</figcaption></figure>
+<h2>Dark theme</h2>
+<figure><img src="screenshots/dark_overview.png" alt="Dashboard executive overview, dark theme" loading="lazy" width="1440" height="2107"><figcaption>Light and dark themes, print layout and CSV export are built in.</figcaption></figure>
+<p class="limits">Limits: synthetic data for a fictional group; counting only Posted journals is the author's assumption, and the dashboard shows how far the headline moves under other rules.</p>
+</div></main>
 </body>
 </html>
