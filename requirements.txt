@@ -1,7 +1,7 @@
 # Requires Python 3.11 or newer (pandas 3.x).
 # Pinned versions used for the published results. QA-only tools (not installed by this file): Playwright + Chromium, LibreOffice.
 pandas==3.0.5
-numpy==2.4.6
+numpy==2.5.4
 openpyxl==3.1.5
 XlsxWriter==3.2.9
 duckdb==2.0.0
